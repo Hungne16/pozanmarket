@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		<meta name="theme-color" content="#08090d">
+		<meta name="description" content="Freelance creative developer and designer specializing in websites, landing pages, UI/UX and presentation design.">
+		<meta property="og:title" content="Pozan Market | Creative Design & Development">
+		<meta property="og:description" content="Websites, interfaces and visual stories designed to make ambitious ideas feel real.">
+		<meta property="og:type" content="website">
+		<title>Pozan Market | Creative Design & Development</title>
+		<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 32 32%22><rect width=%2232%22 height=%2232%22 rx=%226%22 fill=%22%237667ff%22/><path d=%22M9 9h14v14H9z%22 fill=%22none%22 stroke=%22white%22 stroke-width=%222%22 transform=%22rotate(45 16 16)%22/></svg>">
+		<link rel="preconnect" href="https://fonts.googleapis.com">
+		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+		<link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@75..125,300..800&family=Space+Grotesk:wght@400;500;600&display=swap" rel="stylesheet">
+		<link rel="stylesheet" href="./styles.css">
+		<link rel="stylesheet" href="./styles/studio.css">
+		<link rel="stylesheet" href="./styles/preferences.css">
+		<link rel="stylesheet" href="./styles/redesign.css">
+		<script type="importmap">{"imports":{"three":"../build/three.module.js","three/addons/":"../examples/jsm/"}}</script>
+		<script type="module" src="./js/app.js"></script>
+	</head>
+	<body>
+		<a class="skip-link" href="#main">Skip to content</a>
+		<div class="page-noise" aria-hidden="true"></div>
+		<header class="site-header" data-header>
+			<a class="brand" href="#home" aria-label="Pozan Market home">
+				<span class="brand-mark" aria-hidden="true"><i></i><i></i></span>
+				<span>POZAN MARKET</span>
+			</a>
+			<nav class="desktop-nav" aria-label="Primary navigation">
+				<a href="#home" data-i18n="nav.home">Home</a>
+				<a href="#services" data-i18n="nav.services">Services</a>
+				<a href="#work" data-i18n="nav.work">Work</a>
+				<a href="#pricing" data-i18n="nav.pricing">Pricing</a>
+				<a href="#about" data-i18n="nav.about">About</a>
+			</nav>
+			<div class="header-actions">
+				<div class="preference-controls">
+					<div class="language-switch" role="group" aria-label="Language"><button type="button" data-language="vi">VIE</button><button type="button" data-language="en">EN</button></div>
+					<button class="theme-toggle" type="button" data-theme-toggle><span class="sun" aria-hidden="true">☀</span><span class="moon" aria-hidden="true">☾</span></button>
+				</div>
+				<button class="nav-cta js-open-booking" type="button" data-i18n-html="action.start">Start a project <span aria-hidden="true">↗</span></button>
+			</div>
+			<button class="menu-toggle" type="button" aria-label="Open menu" aria-expanded="false" aria-controls="mobile-menu">
+				<span></span><span></span>
+			</button>
+			<div class="mobile-menu" id="mobile-menu" aria-hidden="true">
+				<nav aria-label="Mobile navigation">
+					<a href="#home" data-i18n="nav.home">Home</a><a href="#services" data-i18n="nav.services">Services</a><a href="#work" data-i18n="nav.work">Work</a><a href="#pricing" data-i18n="nav.pricing">Pricing</a><a href="#about" data-i18n="nav.about">About</a>
+				</nav>
+				<div class="mobile-preferences">
+					<div class="preference-controls">
+						<div class="language-switch" role="group" aria-label="Language"><button type="button" data-language="vi">VIE</button><button type="button" data-language="en">EN</button></div>
+						<button class="theme-toggle" type="button" data-theme-toggle><span class="sun" aria-hidden="true">☀</span><span class="moon" aria-hidden="true">☾</span></button>
+					</div>
+					<button class="button button-primary js-open-booking" type="button" data-i18n-html="action.start">Start a project <span aria-hidden="true">↗</span></button>
+				</div>
+			</div>
+		</header>
+
+		<main id="main">
+			<section class="hero" id="home">
+				<div class="hero-grid grid-shell">
+					<div class="hero-copy">
+						<p class="status-badge reveal" data-i18n-html="hero.available"><span></span> Available for freelance projects</p>
+						<p class="hero-discipline reveal" data-i18n="hero.discipline">Independent designer & creative developer</p>
+						<h1 class="reveal reveal-delay-1" data-i18n-html="hero.title">Ideas into<br><em>experiences.</em><br><span class="hero-outline">Made real.</span></h1>
+						<p class="hero-description reveal reveal-delay-2" data-i18n="hero.description">Websites, landing pages, UI/UX and visual presentations designed for brands, startups and ideas that want to stand out.</p>
+						<div class="hero-actions reveal reveal-delay-3">
+							<button class="button button-primary js-open-booking" type="button" data-i18n-html="action.start">Start a project <span aria-hidden="true">↗</span></button>
+							<a class="button button-ghost" href="#work" data-i18n-html="action.viewWork">View selected work <span aria-hidden="true">↓</span></a>
+						</div>
+						<p class="capabilities reveal reveal-delay-3" data-i18n-html="hero.capabilities">Web <i></i> UI/UX <i></i> Presentation <i></i> Creative design</p>
+					</div>
+
+					<div class="core-visual reveal reveal-delay-2" aria-label="Interactive three-dimensional digital creative core">
+						<div class="core-frame"><span>FORM / FUNCTION / FEELING</span><span>自由な発想</span></div>
+						<canvas id="hero-canvas"></canvas>
+						<div class="core-fallback" aria-hidden="true"><span></span></div>
+						<span class="orbit-label label-web">WEB</span>
+						<span class="orbit-label label-ui">UI</span>
+						<span class="orbit-label label-design">DESIGN</span>
+						<span class="orbit-label label-slides">SLIDES</span>
+						<div class="core-readout" aria-hidden="true"><b>POZAN / CREATIVE STUDIO</b><span>Move your cursor. Change the perspective.</span></div>
+					</div>
+				</div>
+				<div class="hero-bottom grid-shell"><span data-i18n="hero.bottom">Independent by choice. Creative by nature.</span><a href="#work" data-i18n-html="hero.explore">Explore my work <span aria-hidden="true">↓</span></a><span>DESIGN × TECHNOLOGY</span></div>
+			</section>
+
+			<section class="section services" id="services">
+				<div class="grid-shell">
+					<div class="section-heading" data-reveal>
+						<p class="eyebrow" data-i18n-html="services.eyebrow"><span>01</span> Capabilities</p>
+						<h2 data-i18n-html="services.title">What I can build<br>for <em>you.</em></h2>
+						<p data-i18n="services.description">One creative partner from first sketch to final interaction.</p>
+					</div>
+					<div class="services-grid" data-services></div>
+				</div>
+			</section>
+
+			<section class="section work" id="work">
+				<div class="grid-shell">
+					<div class="section-heading split-heading" data-reveal>
+						<div><p class="eyebrow" data-i18n-html="work.eyebrow"><span>02</span> Selected projects / 07</p><h2 data-i18n-html="work.title">Out in the <em>world.</em></h2></div>
+						<p data-i18n-html="work.description">Real projects. Each with a world of its own.<br>Explore the live websites below.</p>
+					</div>
+					<div class="logo-projects" data-projects></div>
+				</div>
+			</section>
+
+			<section class="section value-section">
+				<div class="grid-shell">
+					<div class="value-intro" data-reveal>
+						<p class="eyebrow" data-i18n-html="value.eyebrow"><span>03</span> The difference</p>
+						<h2 data-i18n-html="value.title">More than just<br>a pretty <em>interface.</em></h2>
+					</div>
+					<div class="value-list">
+						<article data-reveal><span>01</span><h3 data-i18n="value.1.title">Creative direction</h3><p data-i18n="value.1.text">I do not simply code a template. I build a visual direction around the idea, audience and desired feeling.</p></article>
+						<article data-reveal><span>02</span><h3 data-i18n="value.2.title">Responsive by default</h3><p data-i18n="value.2.text">Desktop, tablet and mobile are treated as one coherent system—not three last-minute adaptations.</p></article>
+						<article data-reveal><span>03</span><h3 data-i18n="value.3.title">Design + development</h3><p data-i18n="value.3.text">One connected workflow can handle both the visual thinking and the implementation, with fewer gaps between them.</p></article>
+					</div>
+				</div>
+			</section>
+
+			<section class="section process" id="process">
+				<div class="grid-shell">
+					<div class="section-heading" data-reveal><p class="eyebrow" data-i18n-html="process.eyebrow"><span>04</span> Workflow</p><h2 data-i18n-html="process.title">From idea to <em>delivery.</em></h2></div>
+					<div class="process-line" data-reveal>
+						<article><b>01</b><span></span><h3 data-i18n="process.1.title">Choose a service</h3><p data-i18n="process.1.text">Choose what you need and select a package.</p></article>
+						<article><b>02</b><span></span><h3 data-i18n="process.2.title">Tell me about it</h3><p data-i18n="process.2.text">Answer a short, focused project brief.</p></article>
+						<article><b>03</b><span></span><h3 data-i18n="process.3.title">Design & build</h3><p data-i18n="process.3.text">The project moves into design and development.</p></article>
+						<article><b>04</b><span></span><h3 data-i18n="process.4.title">Review & delivery</h3><p data-i18n="process.4.text">Review the work and receive the final files or product.</p></article>
+					</div>
+				</div>
+			</section>
+
+			<section class="section pricing" id="pricing">
+				<div class="grid-shell">
+					<div class="section-heading split-heading" data-reveal>
+						<div><p class="eyebrow" data-i18n-html="pricing.eyebrow"><span>05</span> Packages</p><h2 data-i18n-html="pricing.title">Your next idea.<br><em>The right starting point.</em></h2></div>
+						<p data-i18n="pricing.description">Thoughtful design, clearly priced. Find your fit, then make it yours.</p>
+					</div>
+					<div class="pricing-tabs" role="tablist" aria-label="Pricing categories" data-pricing-tabs></div>
+					<div class="pricing-panel" id="pricing-panel" role="tabpanel" data-pricing-panel aria-live="polite"></div>
+					<div class="pricing-assurance"><span data-i18n-html="pricing.direct">↗ &nbsp; Direct collaboration</span><span data-i18n-html="pricing.responsive">◇ &nbsp; Responsive by default</span><span data-i18n-html="pricing.agreed">✓ &nbsp; Scope agreed before we begin</span></div>
+					<p class="pricing-note"><span data-i18n="pricing.note">Need a dashboard, database, authentication or custom system?</span> <button class="text-button js-open-booking" type="button" data-i18n="pricing.scope">Let’s scope it together ↗</button></p>
+				</div>
+			</section>
+
+			<section class="section about" id="about">
+				<div class="grid-shell about-grid">
+					<div class="about-title" data-reveal><p class="eyebrow" data-i18n-html="about.eyebrow"><span>06</span> About</p><h2 data-i18n-html="about.title">Designing between<br><em>code and creativity.</em></h2></div>
+					<div class="about-copy" data-reveal>
+						<p data-i18n="about.p1">I’m a Software Engineering student and multidisciplinary designer focused on building websites, interfaces and visual experiences.</p>
+						<p data-i18n="about.p2">I care about the space where a strong concept becomes something real, usable and unexpectedly memorable.</p>
+						<div class="tool-cloud" aria-label="Tools and skills"><span>Figma</span><span>Framer</span><span>React</span><span>Three.js</span><span>Canva</span><span>PowerPoint</span><span>Photoshop</span></div>
+					</div>
+					<div class="about-art" aria-hidden="true" data-reveal><span class="art-circle"></span><span class="art-grid">PM<br>26</span><i>HANOI / WORLDWIDE</i></div>
+				</div>
+			</section>
+
+			<section class="section faq" id="faq">
+				<div class="grid-shell faq-grid">
+					<div class="section-heading" data-reveal><p class="eyebrow" data-i18n-html="faq.eyebrow"><span>07</span> Questions</p><h2 data-i18n-html="faq.title">Before we<br><em>begin.</em></h2></div>
+					<div class="accordion" data-accordion>
+						<article><h3><button type="button" aria-expanded="false"><span data-i18n="faq.1.q">Do you build websites from scratch or use templates?</span><i></i></button></h3><div class="accordion-panel"><p data-i18n="faq.1.a">Everything is custom-built from scratch. I do not use off-the-shelf templates or visual page builders like Elementor. The code is written specifically for your design, ensuring maximum performance, security, and unique visual direction.</p></div></article>
+						<article><h3><button type="button" aria-expanded="false"><span data-i18n="faq.2.q">How do interactive 3D elements impact page speed?</span><i></i></button></h3><div class="accordion-panel"><p data-i18n="faq.2.a">I use advanced WebGL optimization techniques, such as lazy-loading, polygon reduction, and visibility pausing. This keeps creative interactions smooth without wasting mobile battery.</p></div></article>
+						<article><h3><button type="button" aria-expanded="false"><span data-i18n="faq.3.q">What technologies and frameworks do you use?</span><i></i></button></h3><div class="accordion-panel"><p data-i18n="faq.3.a">For creative landing pages, I often use Vanilla JS, Three.js and GSAP. For complex web apps, I build with React, Next.js, Tailwind CSS and headless CMS solutions.</p></div></article>
+						<article><h3><button type="button" aria-expanded="false"><span data-i18n="faq.4.q">Do I need to provide the design files?</span><i></i></button></h3><div class="accordion-panel"><p data-i18n="faq.4.a">Not necessarily. I can develop an existing Figma design or handle both UI/UX design and development from your initial concept.</p></div></article>
+						<article><h3><button type="button" aria-expanded="false"><span data-i18n="faq.5.q">Will my website be optimized for SEO?</span><i></i></button></h3><div class="accordion-panel"><p data-i18n="faq.5.a">Yes. Websites are built with semantic HTML, performance, metadata and responsive design as technical SEO foundations.</p></div></article>
+						<article><h3><button type="button" aria-expanded="false"><span data-i18n="faq.6.q">How does the handover and hosting process work?</span><i></i></button></h3><div class="accordion-panel"><p data-i18n="faq.6.a">After approval, I can deploy the site, connect your domain and hand over the complete source code and assets.</p></div></article>
+						<article><h3><button type="button" aria-expanded="false"><span data-i18n="faq.7.q">Do you offer ongoing maintenance after launch?</span><i></i></button></h3><div class="accordion-panel"><p data-i18n="faq.7.a">Yes. I offer a 30-day bug-fix guarantee and can arrange ongoing support for content, features or server maintenance.</p></div></article>
+					</div>
+				</div>
+			</section>
+
+			<section class="final-cta" id="contact">
+				<div class="cta-orbit" aria-hidden="true"><i></i><span></span></div>
+				<div class="grid-shell" data-reveal>
+					<p class="eyebrow" data-i18n-html="cta.eyebrow"><span>08</span> Your move</p>
+					<h2 data-i18n-html="cta.title">Have an idea?<br><em>Let’s make it real.</em></h2>
+					<button class="button button-light js-open-booking" type="button" data-i18n-html="cta.button">Start your project <span aria-hidden="true">↗</span></button>
+				</div>
+			</section>
+		</main>
+
+		<footer class="site-footer">
+			<div class="footer-glow" aria-hidden="true"></div>
+			<div class="grid-shell footer-stage" data-footer-stage>
+				<div class="footer-intro">
+					<p class="footer-eyebrow" data-i18n="footer.eyebrow">Independent creative studio · Hanoi / Worldwide</p>
+					<h2 data-i18n-html="footer.heading">Let’s build something<br><em>worth remembering.</em></h2>
+					<p data-i18n="footer.description">Web experiences, visual systems and digital products shaped with intent.</p>
+				</div>
+				<nav class="footer-nav" aria-label="Footer navigation"><span>Explore</span><a href="#services" data-i18n="nav.services">Services</a><a href="#work" data-i18n="nav.work">Work</a><a href="#pricing" data-i18n="nav.pricing">Pricing</a><a href="#about" data-i18n="nav.about">About</a></nav>
+				<div class="footer-social">
+					<p data-i18n="footer.follow">Connect with me</p>
+					<div class="social-3d-links">
+					<!-- Facebook -->
+					<div class="tooltip-container">
+						<div class="tooltip">
+							<div class="profile fb-profile">
+								<div class="user">
+									<div class="img">Fb</div>
+									<div class="details">
+										<div class="name">Vũ Nguyễn</div>
+										<div class="username">@FENOSM</div>
+									</div>
+								</div>
+							</div>
+						</div>
+						<div class="text">
+							<a class="icon icon-fb" href="https://www.facebook.com/FENOSM/" target="_blank" rel="noreferrer">
+								<div class="layer">
+									<span></span><span></span><span></span><span></span>
+									<span class="facebookSVG">
+										<svg viewBox="0 0 40 40" xml:space="preserve" xmlns="http://www.w3.org/2000/svg">
+											<linearGradient gradientUnits="userSpaceOnUse" gradientTransform="matrix(40 0 0 -39.7778 11115.001 16212.334)" y2="407.5726" y1="406.6018" x2="-277.375" x1="-277.375" id="a">
+												<stop stopColor="#0062e0" offset="0"></stop>
+												<stop stopColor="#19afff" offset="1"></stop>
+											</linearGradient>
+											<path d="M16.7 39.8C7.2 38.1 0 29.9 0 20 0 9 9 0 20 0s20 9 20 20c0 9.9-7.2 18.1-16.7 19.8l-1.1-.9h-4.4l-1.1.9z" fill="url(#a)"></path>
+											<path d="m27.8 25.6.9-5.6h-5.3v-3.9c0-1.6.6-2.8 3-2.8H29V8.2c-1.4-.2-3-.4-4.4-.4-4.6 0-7.8 2.8-7.8 7.8V20h-5v5.6h5v14.1c1.1.2 2.2.3 3.3.3 1.1 0 2.2-.1 3.3-.3V25.6h4.4z" fill="#fff"></path>
+										</svg>
+									</span>
+								</div>
+								<div class="text">Facebook</div>
+							</a>
+						</div>
+					</div>
+
+					<!-- GitHub -->
+					<div class="tooltip-container">
+						<div class="tooltip">
+							<div class="profile gh-profile">
+								<div class="user">
+									<div class="img">Gh</div>
+									<div class="details">
+										<div class="name">Developer</div>
+										<div class="username">@Hungne16</div>
+									</div>
+								</div>
+							</div>
+						</div>
+						<div class="text">
+							<a class="icon icon-gh" href="https://github.com/Hungne16" target="_blank" rel="noreferrer">
+								<div class="layer">
+									<span></span><span></span><span></span><span></span>
+									<span class="githubSVG">
+										<svg viewBox="0 0 24 24" fill="currentColor">
+											<path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"></path>
+										</svg>
+									</span>
+								</div>
+								<div class="text">GitHub</div>
+							</a>
+						</div>
+					</div>
+
+					<!-- Instagram -->
+					<div class="tooltip-container">
+						<div class="tooltip">
+							<div class="profile ig-profile">
+								<div class="user">
+									<div class="img">Ig</div>
+									<div class="details">
+										<div class="name">Instagram</div>
+										<div class="username">@instagram</div>
+									</div>
+								</div>
+							</div>
+						</div>
+						<div class="text">
+							<a class="icon icon-ig" href="https://www.instagram.com/h._.ngv/" target="_blank" rel="noreferrer">
+								<div class="layer">
+									<span></span><span></span><span></span><span></span>
+									<span class="instagramSVG">
+										<svg role="img" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M7.0301.084c-1.2768.0602-2.1487.264-2.911.5634-.7888.3075-1.4575.72-2.1228 1.3877-.6652.6677-1.075 1.3368-1.3802 2.127-.2954.7638-.4956 1.6365-.552 2.914-.0564 1.2775-.0689 1.6882-.0626 4.947.0062 3.2586.0206 3.6671.0825 4.9473.061 1.2765.264 2.1482.5635 2.9107.308.7889.72 1.4573 1.388 2.1228.6679.6655 1.3365 1.0743 2.1285 1.38.7632.295 1.6361.4961 2.9134.552 1.2773.056 1.6884.069 4.9462.0627 3.2578-.0062 3.668-.0207 4.9478-.0814 1.28-.0607 2.147-.2652 2.9098-.5633.7889-.3086 1.4578-.72 2.1228-1.3881.665-.6682 1.0745-1.3378 1.3795-2.1284.2957-.7632.4966-1.636.552-2.9124.056-1.2809.0692-1.6898.063-4.948-.0063-3.2583-.021-3.6668-.0817-4.9465-.0607-1.2797-.264-2.1487-.5633-2.9117-.3084-.7889-.72-1.4568-1.3876-2.1228C21.2982 1.33 20.628.9208 19.8378.6165 19.074.321 18.2017.1197 16.9244.0645 15.6471.0093 15.236-.005 11.977.0014 8.718.0076 8.31.0215 7.0301.0839m.1402 21.6932c-1.17-.0509-1.8053-.2453-2.2287-.408-.5606-.216-.96-.4771-1.3819-.895-.422-.4178-.6811-.8186-.9-1.378-.1644-.4234-.3624-1.058-.4171-2.228-.0595-1.2645-.072-1.6442-.079-4.848-.007-3.2037.0053-3.583.0607-4.848.05-1.169.2456-1.805.408-2.2282.216-.5613.4762-.96.895-1.3816.4188-.4217.8184-.6814 1.3783-.9003.423-.1651 1.0575-.3614 2.227-.4171 1.2655-.06 1.6447-.072 4.848-.079 3.2033-.007 3.5835.005 4.8495.0608 1.169.0508 1.8053.2445 2.228.408.5608.216.96.4754 1.3816.895.4217.4194.6816.8176.9005 1.3787.1653.4217.3617 1.056.4169 2.2263.0602 1.2655.0739 1.645.0796 4.848.0058 3.203-.0055 3.5834-.061 4.848-.051 1.17-.245 1.8055-.408 2.2294-.216.5604-.4763.96-.8954 1.3814-.419.4215-.8181.6811-1.3783.9-.4224.1649-1.0577.3617-2.2262.4174-1.2656.0595-1.6448.072-4.8493.079-3.2045.007-3.5825-.006-4.848-.0608M16.953 5.5864A1.44 1.44 0 1 0 18.39 4.144a1.44 1.44 0 0 0-1.437 1.4424M5.8385 12.012c.0067 3.4032 2.7706 6.1557 6.173 6.1493 3.4026-.0065 6.157-2.7701 6.1506-6.1733-.0065-3.4032-2.771-6.1565-6.174-6.1498-3.403.0067-6.156 2.771-6.1496 6.1738M8 12.0077a4 4 0 1 1 4.008 3.9921A3.9996 3.9996 0 0 1 8 12.0077"/></svg>
+									</span>
+								</div>
+								<div class="text">Instagram</div>
+							</a>
+						</div>
+					</div>
+
+					<!-- Zalo -->
+					<div class="tooltip-container">
+						<div class="tooltip">
+							<div class="profile zl-profile">
+								<div class="user">
+									<div class="img">Zl</div>
+									<div class="details">
+										<div class="name">Zalo</div>
+										<div class="username">0376376662</div>
+									</div>
+								</div>
+							</div>
+						</div>
+						<div class="text">
+							<a class="icon icon-zl" href="https://zalo.me" target="_blank" rel="noreferrer">
+								<div class="layer">
+									<span></span><span></span><span></span><span></span>
+									<span class="zaloSVG">
+										<svg role="img" viewBox="0 0 24 24" xmlns="https://upload.wikimedia.org/wikipedia/commons/d/d6/Logo_Zalo.png?utm_source=vi.wikipedia.org&utm_campaign=index&utm_content=original"><path d="M12.49 10.2722v-.4496h1.3467v6.3218h-.7704a.576.576 0 01-.5763-.5729l-.0006.0005a3.273 3.273 0 01-1.9372.6321c-1.8138 0-3.2844-1.4697-3.2844-3.2823 0-1.8125 1.4706-3.2822 3.2844-3.2822a3.273 3.273 0 011.9372.6321l.0006.0005zM6.9188 7.7896v.205c0 .3823-.051.6944-.2995 1.0605l-.03.0343c-.0542.0615-.1815.206-.2421.2843L2.024 14.8h4.8948v.7682a.5764.5764 0 01-.5767.5761H0v-.3622c0-.4436.1102-.6414.2495-.8476L4.8582 9.23H.1922V7.7896h6.7266zm8.5513 8.3548a.4805.4805 0 01-.4803-.4798v-7.875h1.4416v8.3548H15.47zM20.6934 9.6C22.52 9.6 24 11.0807 24 12.9044c0 1.8252-1.4801 3.306-3.3066 3.306-1.8264 0-3.3066-1.4808-3.3066-3.306 0-1.8237 1.4802-3.3044 3.3066-3.3044zm-10.1412 5.253c1.0675 0 1.9324-.8645 1.9324-1.9312 0-1.065-.865-1.9295-1.9324-1.9295s-1.9324.8644-1.9324 1.9295c0 1.0667.865 1.9312 1.9324 1.9312zm10.1412-.0033c1.0737 0 1.945-.8707 1.945-1.9453 0-1.073-.8713-1.9436-1.945-1.9436-1.0753 0-1.945.8706-1.945 1.9436 0 1.0746.8697 1.9453 1.945 1.9453z"/></svg>
+									</span>
+								</div>
+								<div class="text">Zalo</div>
+							</a>
+						</div>
+					</div>
+					</div>
+				</div>
+				<a class="footer-wordmark" href="#home" aria-label="Pozan Market — back to top"><span class="footer-wordmark-letter">P</span><span class="footer-wordmark-letter">O</span><span class="footer-wordmark-letter">Z</span><span class="footer-wordmark-letter">A</span><span class="footer-wordmark-letter">N</span><span class="footer-wordmark-letter">M</span><span class="footer-wordmark-letter">A</span><span class="footer-wordmark-letter">R</span><span class="footer-wordmark-letter">K</span><span class="footer-wordmark-letter">E</span><span class="footer-wordmark-letter">T</span></a>
+				<div class="footer-bottom">
+					<p data-i18n="footer.copyright">© 2026 Pozan Market. Built with intent.</p>
+					<span>CREATIVE DEVELOPMENT / 2026</span>
+					<a href="#home" data-i18n="footer.back">Back to top ↑</a>
+				</div>
+			</div>
+		</footer>
+
+		<dialog class="booking-dialog" data-booking-dialog aria-labelledby="booking-title">
+			<div class="booking-shell">
+				<header class="booking-header">
+					<div><p data-i18n="booking.request">Project request</p><span data-step-label>Step 1 / 10</span></div>
+					<div class="booking-progress" aria-hidden="true"><span data-progress></span></div>
+					<button class="dialog-close" type="button" aria-label="Close project request" data-close-booking><i></i><i></i></button>
+				</header>
+				<form class="booking-form" novalidate data-booking-form>
+					<div class="booking-content" data-booking-content></div>
+					<p class="form-error" role="alert" data-form-error></p>
+					<footer class="booking-actions">
+						<button class="button button-ghost" type="button" data-booking-back data-i18n="booking.back">Back</button>
+						<button class="button button-primary" type="button" data-booking-next data-i18n-html="booking.continue">Continue <span aria-hidden="true">→</span></button>
+					</footer>
+				</form>
+			</div>
+		</dialog>
+	</body>
+</html>

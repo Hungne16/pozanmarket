@@ -1,0 +1,177 @@
+﻿/* 3D Social Buttons based on User's React Component */
+.social-3d-links {
+    display: flex;
+    gap: 40px;
+    align-items: center;
+    justify-content: flex-start;
+    flex-wrap: wrap;
+}
+
+.tooltip-container {
+    position: relative;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-size: 17px;
+    border-radius: 10px;
+    z-index: 10;
+}
+
+.tooltip {
+    position: absolute;
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    padding: 10px;
+    opacity: 0;
+    pointer-events: none;
+    transition: all 0.3s;
+    border-radius: 15px;
+    box-shadow: inset 5px 5px 5px rgba(0, 0, 0, 0.2),
+        inset -5px -5px 15px rgba(255, 255, 255, 0.1),
+        5px 5px 15px rgba(0, 0, 0, 0.3), -5px -5px 15px rgba(255, 255, 255, 0.1);
+    white-space: nowrap;
+    z-index: 20;
+}
+
+.profile {
+    border-radius: 10px 15px;
+    padding: 10px 15px;
+}
+.fb-profile { background: #3b5998; border: 1px solid #29487d; }
+.gh-profile { background: #24292e; border: 1px solid #1b1f23; }
+.ig-profile { background: #d6249f; border: 1px solid #fd5949; }
+.zl-profile { background: #0068ff; border: 1px solid #0056d6; }
+
+.tooltip-container:hover .tooltip {
+    top: -90px;
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+}
+
+.tooltip-container .icon {
+    text-decoration: none;
+    color: #fff;
+    display: block;
+    position: relative;
+}
+
+.tooltip-container .icon .layer {
+    width: 44px;
+    height: 44px;
+    border: 2px solid;
+    border-radius: 50%;
+    transition: transform 0.3s, border 0.3s ease, box-shadow 0.3s ease;
+}
+
+.icon-fb .layer { border-color: #1877f2; box-shadow: 0 0 15px rgba(24, 119, 242, 0.7), 0 0 20px rgba(24, 119, 242, 0.5); }
+.icon-gh .layer { border-color: #ffffff; box-shadow: 0 0 15px rgba(255, 255, 255, 0.3), 0 0 20px rgba(255, 255, 255, 0.2); }
+.icon-ig .layer { border-color: #d6249f; box-shadow: 0 0 15px rgba(214, 36, 159, 0.7), 0 0 20px rgba(214, 36, 159, 0.5); }
+.icon-zl .layer { border-color: #0068ff; box-shadow: 0 0 15px rgba(0, 104, 255, 0.7), 0 0 20px rgba(0, 104, 255, 0.5); }
+
+.tooltip-container .icon:hover .layer {
+    transform: rotate(-35deg) skew(20deg);
+}
+.icon-fb:hover .layer { box-shadow: 0 0 30px rgba(24, 119, 242, 1), 0 0 40px rgba(24, 119, 242, 0.7); }
+.icon-gh:hover .layer { box-shadow: 0 0 30px rgba(255, 255, 255, 0.8), 0 0 40px rgba(255, 255, 255, 0.5); }
+.icon-ig:hover .layer { box-shadow: 0 0 30px rgba(214, 36, 159, 1), 0 0 40px rgba(214, 36, 159, 0.7); }
+.icon-zl:hover .layer { box-shadow: 0 0 30px rgba(0, 104, 255, 1), 0 0 40px rgba(0, 104, 255, 0.7); }
+
+.tooltip-container .layer span {
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 100%;
+    width: 100%;
+    border: 1px solid #fff;
+    border-radius: 50%;
+    transition: all 0.3s;
+}
+
+.icon-fb .layer span, .icon-fb .text { color: #1877f2; border-color: #1877f2; }
+.icon-gh .layer span, .icon-gh .text { color: #ffffff; border-color: #ffffff; }
+.icon-ig .layer span, .icon-ig .text { color: #d6249f; border-color: #d6249f; }
+.icon-zl .layer span, .icon-zl .text { color: #0068ff; border-color: #0068ff; }
+
+.icon-fb:hover .layer span { box-shadow: -1px 1px 3px #1877f2; }
+.icon-gh:hover .layer span { box-shadow: -1px 1px 3px #ffffff; }
+.icon-ig:hover .layer span { box-shadow: -1px 1px 3px #d6249f; }
+.icon-zl:hover .layer span { box-shadow: -1px 1px 3px #0068ff; }
+
+.tooltip-container .icon .text {
+    position: absolute;
+    left: 50%;
+    bottom: -5px;
+    opacity: 0;
+    font-weight: 500;
+    font-size: 13px;
+    transform: translateX(-50%);
+    transition: bottom 0.3s ease, opacity 0.3s ease;
+}
+
+.tooltip-container .icon:hover .text {
+    bottom: -25px;
+    opacity: 1;
+}
+
+.tooltip-container .icon:hover .layer span:nth-child(1) { opacity: 0.2; }
+.tooltip-container .icon:hover .layer span:nth-child(2) { opacity: 0.4; transform: translate(4px, -4px); }
+.tooltip-container .icon:hover .layer span:nth-child(3) { opacity: 0.6; transform: translate(8px, -8px); }
+.tooltip-container .icon:hover .layer span:nth-child(4) { opacity: 0.8; transform: translate(12px, -12px); }
+.tooltip-container .icon:hover .layer span:nth-child(5) { opacity: 1; transform: translate(16px, -16px); }
+
+.facebookSVG, .githubSVG, .instagramSVG, .zaloSVG {
+    font-size: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    width: 100%;
+    height: 100%;
+}
+.facebookSVG {
+    background: linear-gradient(45deg, #1877f2 0%, #3b5998 25%, #1877f2 50%, #3b5998 75%, #1877f2 100%);
+}
+.githubSVG {
+    background: #24292e;
+    color: white;
+}
+.instagramSVG {
+    background: radial-gradient(circle at 30% 107%, #fdf497 0%, #fdf497 5%, #fd5949 45%, #d6249f 60%, #285AEB 90%);
+    color: white;
+}
+.zaloSVG {
+    background: #0068ff;
+    color: white;
+}
+.facebookSVG svg, .githubSVG svg, .instagramSVG svg, .zaloSVG svg {
+    width: 24px;
+    height: 24px;
+    fill: currentColor;
+}
+
+.profile .user { display: flex; gap: 10px; align-items: center; }
+.profile .img {
+    width: 40px;
+    height: 40px;
+    font-size: 18px;
+    font-weight: 700;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #fff;
+}
+.fb-profile .img { border: 1px solid #1877f2; color: #1877f2; }
+.gh-profile .img { border: 1px solid #333; color: #333; }
+.ig-profile .img { border: 1px solid #d6249f; color: #d6249f; }
+.zl-profile .img { border: 1px solid #0068ff; color: #0068ff; }
+
+.profile .name { font-size: 14px; font-weight: 700; line-height: 1.2; }
+.fb-profile .name { color: #87baff; }
+.gh-profile .name { color: #ffffff; }
+.ig-profile .name { color: #ffffff; }
+.zl-profile .name { color: #ffffff; }
+
+.profile .details { display: flex; flex-direction: column; gap: 0; color: #fff; }
+.profile .username { font-size: 12px; color: #ccc; }

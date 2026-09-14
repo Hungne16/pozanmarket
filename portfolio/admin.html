@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		<meta name="theme-color" content="#08090d">
+		<meta name="description" content="Pozan Market project inquiry dashboard.">
+		<title>Project Dashboard — Pozan Market</title>
+		<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 32 32%22><rect width=%2232%22 height=%2232%22 rx=%226%22 fill=%22%237667ff%22/><path d=%22M9 9h14v14H9z%22 fill=%22none%22 stroke=%22white%22 stroke-width=%222%22 transform=%22rotate(45 16 16)%22/></svg>">
+		<link rel="preconnect" href="https://fonts.googleapis.com">
+		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+		<link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@75..125,300..800&family=Space+Grotesk:wght@400;500;600&display=swap" rel="stylesheet">
+		<link rel="stylesheet" href="./styles.css">
+		<link rel="stylesheet" href="./styles/admin.css">
+		<link rel="stylesheet" href="./styles/preferences.css">
+		<script type="module" src="./js/admin.js"></script>
+	</head>
+	<body class="admin-page">
+		<a class="skip-link" href="#dashboard-main">Skip to dashboard</a>
+		<div class="page-noise" aria-hidden="true"></div>
+
+		<aside class="admin-sidebar">
+			<div class="sidebar-head">
+				<a class="brand" href="./" aria-label="Pozan Market portfolio">
+					<span class="brand-mark" aria-hidden="true"><i></i><i></i></span>
+					<span>POZAN MARKET</span>
+				</a>
+				<a class="sidebar-site-link" href="./" data-i18n-html="admin.viewSite">View site <span aria-hidden="true">↗</span></a>
+			</div>
+			<div class="admin-nav-label" data-i18n="admin.workspace">Workspace</div>
+			<nav class="admin-nav" aria-label="Admin navigation">
+				<button class="is-current" type="button" data-view="all"><span aria-hidden="true">◇</span><em data-i18n="admin.all">All projects</em><b data-count-all>0</b></button>
+				<button type="button" data-view="new"><span class="nav-dot new" aria-hidden="true"></span><em data-i18n="admin.new">New inquiries</em><b data-count-new>0</b></button>
+				<button type="button" data-view="active"><span class="nav-dot active" aria-hidden="true"></span><em data-i18n="admin.active">In progress</em><b data-count-active>0</b></button>
+				<button type="button" data-view="completed"><span class="nav-dot completed" aria-hidden="true"></span><em data-i18n="admin.completed">Completed</em><b data-count-completed>0</b></button>
+				<button type="button" data-view="archived"><span aria-hidden="true">▱</span><em data-i18n="admin.archived">Archived</em><b data-count-archived>0</b></button>
+				<span class="admin-nav-divider"></span>
+				<button type="button" data-workspace-target="catalog"><span aria-hidden="true">◫</span><em data-i18n="admin.catalog">Services & pricing</em></button>
+				<button type="button" data-workspace-target="options"><span aria-hidden="true">⌘</span><em data-i18n="admin.bookingSetup">Booking options</em></button>
+			</nav>
+			<div class="storage-note">
+				<span class="pulse" aria-hidden="true"></span>
+				<div><b data-i18n="admin.local">Local workspace</b><small data-i18n="admin.localNote">Data is stored on this browser only.</small></div>
+			</div>
+		</aside>
+
+		<main class="admin-main" id="dashboard-main">
+			<header class="admin-topbar">
+				<div>
+					<p class="admin-eyebrow" data-i18n-html="admin.kicker"><span>ADMIN</span> / PROJECT WORKSPACE</p>
+					<h1 data-i18n="admin.title" data-workspace-title>Your project pipeline.</h1>
+					<p class="admin-date" data-current-date></p>
+				</div>
+				<div class="topbar-actions">
+					<div class="preference-controls">
+						<div class="language-switch" role="group" aria-label="Language"><button type="button" data-language="vi">VIE</button><button type="button" data-language="en">EN</button></div>
+						<button class="theme-toggle" type="button" data-theme-toggle><span class="sun" aria-hidden="true">☀</span><span class="moon" aria-hidden="true">☾</span></button>
+					</div>
+					<button class="admin-button secondary" type="button" data-export data-i18n-html="admin.export"><span aria-hidden="true">↓</span> Export CSV</button>
+					<a class="admin-button primary" href="./" data-i18n-html="admin.open">Open portfolio <span aria-hidden="true">↗</span></a>
+				</div>
+			</header>
+
+			<section class="stat-grid" aria-label="Project overview" data-project-workspace>
+				<button class="stat-card accent-card" type="button" data-view="all"><div class="stat-top"><span data-i18n="admin.current">Current projects</span><i aria-hidden="true">↗</i></div><strong data-stat-total>0</strong><small data-i18n="admin.currentNote">Everything outside the archive</small></button>
+				<button class="stat-card" type="button" data-view="new"><div class="stat-top"><span data-i18n="admin.new">New inquiries</span><i class="status-dot new" aria-hidden="true"></i></div><strong data-stat-new>0</strong><small data-i18n="admin.newNote">Waiting for your first response</small></button>
+				<button class="stat-card" type="button" data-view="active"><div class="stat-top"><span data-i18n="admin.active">In progress</span><i class="status-dot progress" aria-hidden="true"></i></div><strong data-stat-progress>0</strong><small data-i18n="admin.activeNote">Projects you are working on</small></button>
+				<button class="stat-card" type="button" data-view="completed"><div class="stat-top"><span data-i18n="admin.completed">Completed</span><i class="status-dot completed" aria-hidden="true"></i></div><strong data-stat-completed>0</strong><small data-i18n="admin.completedNote">Finished project history</small></button>
+			</section>
+
+			<section class="inquiries-section" id="inquiries" data-project-workspace>
+				<div class="section-title-row">
+					<div><p class="admin-eyebrow" data-view-eyebrow><span>01</span> PROJECT PIPELINE</p><h2 data-view-title>All projects</h2></div>
+					<p><span data-results-count>0</span> <span data-i18n="admin.results">results</span></p>
+				</div>
+				<div class="admin-toolbar">
+					<label class="search-field">
+						<span class="sr-only">Search inquiries</span>
+						<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"></circle><path d="m16 16 4 4"></path></svg>
+						<input type="search" placeholder="Search client, request, goal or service…" data-search data-i18n-placeholder="admin.search">
+					</label>
+					<label class="select-field"><span class="sr-only">Filter by service</span><select data-service-filter><option value="all" data-i18n="admin.allServices">All services</option></select></label>
+					<label class="select-field sort-field"><span class="sr-only">Sort inquiries</span><select data-sort><option value="newest" data-i18n="admin.newest">Newest first</option><option value="oldest" data-i18n="admin.oldest">Oldest first</option><option value="deadline" data-i18n="admin.deadlineSort">Nearest deadline</option></select></label>
+				</div>
+				<div class="inquiry-list" data-inquiry-list></div>
+			</section>
+
+			<section class="management-section" hidden data-management-workspace="catalog">
+				<div class="management-hero">
+					<div><p class="admin-eyebrow"><span>CATALOG</span> / LIVE PORTFOLIO DATA</p><h2 data-i18n="admin.catalogTitle">Services and pricing.</h2><p data-i18n="admin.catalogIntro">Edit prices, descriptions and packages. Changes appear on the portfolio after reload.</p></div>
+					<div class="management-actions"><button class="admin-button secondary" type="button" data-reset-catalog data-i18n="admin.restoreDefaults">Restore defaults</button><button class="admin-button primary" type="button" data-add-service data-i18n="admin.addService">Add service</button></div>
+				</div>
+				<div class="catalog-list" data-catalog-list></div>
+			</section>
+
+			<section class="management-section" hidden data-management-workspace="options">
+				<div class="management-hero">
+					<div><p class="admin-eyebrow"><span>BOOKING</span> / FORM CONFIGURATION</p><h2 data-i18n="admin.optionsTitle">Control every choice.</h2><p data-i18n="admin.optionsIntro">Use one line per option. Visual styles support “Name | Description”.</p></div>
+					<button class="admin-button primary" type="button" data-save-options data-i18n="admin.saveOptions">Save booking options</button>
+				</div>
+				<div class="option-editor-grid">
+					<label class="config-field"><span data-i18n="admin.projectTypes">Project types</span><textarea rows="9" data-option-field="projectTypes"></textarea></label>
+					<label class="config-field"><span data-i18n="admin.projectGoals">Project goals</span><textarea rows="9" data-option-field="projectGoals"></textarea></label>
+					<label class="config-field"><span data-i18n="admin.contentChoices">Content choices</span><textarea rows="9" data-option-field="contentOptions"></textarea></label>
+					<label class="config-field"><span data-i18n="admin.visualStyles">Visual styles</span><textarea rows="9" data-option-field="styles"></textarea></label>
+				</div>
+			</section>
+
+			<footer class="admin-footer" data-project-workspace><p data-i18n="admin.footer">Pozan Market / Local project workspace</p><button type="button" data-clear-all data-i18n="admin.clear">Clear all data</button></footer>
+		</main>
+
+		<dialog class="detail-dialog" data-detail-dialog aria-labelledby="detail-title">
+			<div class="detail-shell">
+				<header class="detail-header">
+					<div><p class="admin-eyebrow" data-i18n-html="admin.detailsKicker"><span>PROJECT</span> / FULL BRIEF</p><h2 id="detail-title" data-detail-title>Project inquiry</h2></div>
+					<button class="dialog-close" type="button" aria-label="Close details" data-close-detail><i></i><i></i></button>
+				</header>
+				<div class="detail-body" data-detail-body></div>
+			</div>
+		</dialog>
+		<div class="admin-toast" role="status" aria-live="polite" data-toast></div>
+	</body>
+</html>
