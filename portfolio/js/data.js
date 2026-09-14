@@ -77,6 +77,8 @@
 	}
 ];
 
+import { isBackendConfigured, loadRemoteSettings, saveRemoteSettings } from './backend.js';
+
 const CATALOG_KEY = 'pozan_catalog';
 const BOOKING_OPTIONS_KEY = 'pozan_booking_options';
 
@@ -112,17 +114,8 @@ const CORE_PRICING_CATEGORIES = [
 	{ id: 'presentation', label: 'Presentation' }
 ];
 
-export const PRICING_CATEGORIES = [
-	...CORE_PRICING_CATEGORIES,
-	...SERVICES.filter( ( service ) => ! [ 'landing', 'website', 'uiux', 'canva', 'poster', 'presentation', 'other' ].includes( service.id ) ).map( ( service ) => ( { id: service.id, label: service.name } ) )
-];
-
-export const DESIGN_PRICING = [ 'uiux', 'canva', 'poster' ].map( ( serviceId ) => {
-
-	const service = SERVICES.find( ( item ) => item.id === serviceId );
-	return { ...service.packages[ 0 ], name: service.name, serviceId };
-
-} );
+export const PRICING_CATEGORIES = [];
+export const DESIGN_PRICING = [];
 
 const DEFAULT_BOOKING_OPTIONS = {
 	projectTypes: [ 'Personal', 'Startup', 'Company', 'Education', 'E-commerce', 'Event', 'Other' ],
@@ -145,21 +138,76 @@ export const PROJECT_GOALS = storedBookingOptions.projectGoals || clone( DEFAULT
 export const CONTENT_OPTIONS = storedBookingOptions.contentOptions || clone( DEFAULT_BOOKING_OPTIONS.contentOptions );
 export const STYLE_OPTIONS = storedBookingOptions.styles || clone( DEFAULT_BOOKING_OPTIONS.styles );
 
+function replaceArray( target, values ) {
+
+	target.splice( 0, target.length, ...clone( values ) );
+
+}
+
+function syncDerivedPricing() {
+
+	replaceArray( PRICING_CATEGORIES, [
+		...CORE_PRICING_CATEGORIES,
+		...SERVICES.filter( ( service ) => ! [ 'landing', 'website', 'uiux', 'canva', 'poster', 'presentation', 'other' ].includes( service.id ) ).map( ( service ) => ( { id: service.id, label: service.name } ) )
+	] );
+	replaceArray( DESIGN_PRICING, [ 'uiux', 'canva', 'poster' ].map( ( serviceId ) => {
+
+		const service = SERVICES.find( ( item ) => item.id === serviceId );
+		return service ? { ...service.packages[ 0 ], name: service.name, serviceId } : null;
+
+	} ).filter( Boolean ) );
+
+}
+
+function applyBookingOptions( options ) {
+
+	replaceArray( PROJECT_TYPES, options.projectTypes || DEFAULT_BOOKING_OPTIONS.projectTypes );
+	replaceArray( PROJECT_GOALS, options.projectGoals || DEFAULT_BOOKING_OPTIONS.projectGoals );
+	replaceArray( CONTENT_OPTIONS, options.contentOptions || DEFAULT_BOOKING_OPTIONS.contentOptions );
+	replaceArray( STYLE_OPTIONS, options.styles || DEFAULT_BOOKING_OPTIONS.styles );
+
+}
+
+syncDerivedPricing();
+
+export async function initializeStudioData() {
+
+	if ( ! isBackendConfigured() ) return;
+	try {
+
+		const settings = await loadRemoteSettings();
+		if ( Array.isArray( settings?.catalog ) ) replaceArray( SERVICES, settings.catalog );
+		if ( settings?.booking ) applyBookingOptions( settings.booking );
+		syncDerivedPricing();
+
+	} catch ( error ) {
+
+		console.error( 'Unable to load Convex settings; using local defaults.', error );
+
+	}
+
+}
+
 export function getDefaultStudioSettings() {
 
 	return { services: clone( DEFAULT_SERVICES ), booking: clone( DEFAULT_BOOKING_OPTIONS ) };
 
 }
 
-export function saveCatalog( services ) {
+export async function saveCatalog( services, adminKey = '' ) {
 
 	localStorage.setItem( CATALOG_KEY, JSON.stringify( services ) );
+	replaceArray( SERVICES, services );
+	syncDerivedPricing();
+	if ( isBackendConfigured() ) await saveRemoteSettings( 'catalog', services, adminKey );
 
 }
 
-export function saveBookingOptions( options ) {
+export async function saveBookingOptions( options, adminKey = '' ) {
 
 	localStorage.setItem( BOOKING_OPTIONS_KEY, JSON.stringify( options ) );
+	applyBookingOptions( options );
+	if ( isBackendConfigured() ) await saveRemoteSettings( 'booking', options, adminKey );
 
 }
 

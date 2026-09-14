@@ -29,10 +29,15 @@ test/unit/build
 /*
 !/.gitattributes
 !/.gitignore
+!/.vercelignore
 !/LICENSE
 !/README.md
 !/package.json
 !/package-lock.json
+!/vite.config.js
+!/vercel.json
+!/convex/
+!/convex/**
 !/portfolio/
 !/portfolio/**
 !/build/
@@ -50,3 +55,7 @@ test/unit/build
 !/examples/jsm/geometries/RoundedBoxGeometry.js
 
 **/node_modules
+
+.env.local
+
+.vercel

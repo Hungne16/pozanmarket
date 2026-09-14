@@ -7,12 +7,22 @@ import {
 	getDefaultStudioSettings,
 	getPackage,
 	getService,
+	initializeStudioData,
 	saveBookingOptions,
 	saveCatalog
 } from './data.js';
+import {
+	clearRemoteOrders,
+	createRemoteOrder,
+	isBackendConfigured,
+	loadRemoteOrders,
+	removeRemoteOrder,
+	updateRemoteOrder
+} from './backend.js';
 import { getLanguage, initializePreferences, localizeValue, t } from './preferences.js';
 
 const STORAGE_KEY = 'portfolio_orders';
+const ADMIN_KEY_STORAGE = 'pozan_admin_key';
 const STATUS_OPTIONS = [
 	{ value: 'new', key: 'admin.status.new' },
 	{ value: 'contacted', key: 'admin.status.contacted' },
@@ -41,7 +51,7 @@ const elements = {
 	toast: document.querySelector( '[data-toast]' )
 };
 
-let orders = loadOrders();
+let orders = [];
 let catalog = JSON.parse( JSON.stringify( SERVICES ) );
 let bookingSettings = {
 	projectTypes: [ ...PROJECT_TYPES ],
@@ -53,6 +63,7 @@ let activeOrderId = '';
 let activeView = 'all';
 let activeWorkspace = 'projects';
 let toastTimer = 0;
+let adminKey = '';
 
 function escapeHtml( value ) {
 
@@ -60,7 +71,7 @@ function escapeHtml( value ) {
 
 }
 
-function loadOrders() {
+function loadLocalOrders() {
 
 	try {
 
@@ -81,7 +92,7 @@ function loadOrders() {
 
 }
 
-function saveOrders() {
+function saveLocalOrders() {
 
 	localStorage.setItem( STORAGE_KEY, JSON.stringify( orders ) );
 
@@ -378,20 +389,28 @@ function setActiveView( view ) {
 
 }
 
-function updateStatus( orderId, status, showCompleted = false ) {
+async function updateStatus( orderId, status, showCompleted = false ) {
 
 	const order = orders.find( ( item ) => item.id === orderId );
 	if ( ! order ) return;
 	order.status = status;
 	order.completedAt = status === 'completed' ? new Date().toISOString() : '';
-	saveOrders();
+	if ( isBackendConfigured() ) {
+
+		await updateRemoteOrder( order.id, { status: order.status, completedAt: order.completedAt }, adminKey );
+
+	} else {
+
+		saveLocalOrders();
+
+	}
 	if ( showCompleted && status === 'completed' ) activeView = 'completed';
 	renderDashboard();
 	showToast( status === 'completed' ? t( 'admin.movedCompleted' ) : t( 'admin.statusUpdated' ) );
 
 }
 
-function saveProjectProgress() {
+async function saveProjectProgress() {
 
 	const order = orders.find( ( item ) => item.id === activeOrderId );
 	if ( ! order ) return;
@@ -404,19 +423,40 @@ function saveProjectProgress() {
 		done: row.querySelector( 'input[type="checkbox"]' ).checked
 	} ) ).filter( ( task ) => task.label );
 	if ( [ 'new', 'contacted' ].includes( order.status ) && ( order.progress > 0 || order.phase !== 'discovery' ) ) order.status = 'in-progress';
-	saveOrders();
+	const updates = {
+		phase: order.phase,
+		targetDate: order.targetDate,
+		progress: order.progress,
+		internalNotes: order.internalNotes,
+		tasks: order.tasks,
+		status: order.status
+	};
+	if ( isBackendConfigured() ) {
+
+		await updateRemoteOrder( order.id, updates, adminKey );
+
+	} else {
+
+		saveLocalOrders();
+
+	}
 	renderDashboard();
 	openDetail( order.id );
 	showToast( t( 'admin.progressSaved' ) );
 
 }
 
-function deleteOrder( orderId ) {
+async function deleteOrder( orderId ) {
 
 	const order = orders.find( ( item ) => item.id === orderId );
 	if ( ! order || ! window.confirm( t( 'admin.deleteConfirm' ) ) ) return;
+	if ( isBackendConfigured() ) {
+
+		await removeRemoteOrder( orderId, adminKey );
+
+	}
 	orders = orders.filter( ( item ) => item.id !== orderId );
-	saveOrders();
+	if ( ! isBackendConfigured() ) saveLocalOrders();
 	if ( elements.dialog.open ) closeDetail();
 	renderDashboard();
 	showToast( t( 'admin.deleted' ) );
@@ -515,7 +555,7 @@ function readServiceCard( card ) {
 
 }
 
-function saveServiceCard( card ) {
+async function saveServiceCard( card ) {
 
 	const service = readServiceCard( card );
 	if ( ! service.name || ! service.price ) {
@@ -527,14 +567,14 @@ function saveServiceCard( card ) {
 
 	const index = catalog.findIndex( ( item ) => item.id === service.id );
 	catalog[ index ] = service;
-	saveCatalog( catalog );
+	await saveCatalog( catalog, adminKey );
 	renderCatalog();
 	renderLocale();
 	showToast( t( 'admin.productSaved' ) );
 
 }
 
-function addService() {
+async function addService() {
 
 	const id = `custom-${Date.now()}`;
 	catalog.push( {
@@ -545,7 +585,7 @@ function addService() {
 		description: '',
 		packages: [ { id: 'starter', name: 'Starter', price: 'Contact', estimate: 'Contact', features: [] } ]
 	} );
-	saveCatalog( catalog );
+	await saveCatalog( catalog, adminKey );
 	renderCatalog();
 	document.querySelector( `[data-catalog-id="${id}"]` )?.scrollIntoView( { behavior: 'smooth', block: 'center' } );
 
@@ -566,7 +606,7 @@ function linesFrom( selector ) {
 
 }
 
-function storeBookingSettings() {
+async function storeBookingSettings() {
 
 	const styleClasses = [ 'style-minimal', 'style-modern', 'style-technology', 'style-creative', 'style-anime', 'style-luxury', 'style-other' ];
 	bookingSettings = {
@@ -587,7 +627,7 @@ function storeBookingSettings() {
 
 	}
 
-	saveBookingOptions( bookingSettings );
+	await saveBookingOptions( bookingSettings, adminKey );
 	showToast( t( 'admin.optionsSaved' ) );
 
 }
@@ -654,7 +694,46 @@ async function copyContact() {
 
 }
 
-function initialize() {
+async function initializeData() {
+
+	await initializeStudioData();
+	catalog = JSON.parse( JSON.stringify( SERVICES ) );
+	bookingSettings = {
+		projectTypes: [ ...PROJECT_TYPES ],
+		projectGoals: [ ...PROJECT_GOALS ],
+		contentOptions: [ ...CONTENT_OPTIONS ],
+		styles: STYLE_OPTIONS.map( ( style ) => ( { ...style } ) )
+	};
+	if ( ! isBackendConfigured() ) {
+
+		orders = loadLocalOrders();
+		return;
+
+	}
+	adminKey = sessionStorage.getItem( ADMIN_KEY_STORAGE ) || window.prompt( getLanguage() === 'vi' ? 'Nhập mã quản trị Pozan Market' : 'Enter the Pozan Market admin key' ) || '';
+	if ( ! adminKey ) throw new Error( 'Admin key is required.' );
+	sessionStorage.setItem( ADMIN_KEY_STORAGE, adminKey );
+	orders = await loadRemoteOrders( adminKey );
+	const localOrders = loadLocalOrders();
+	if ( ! orders.length && localOrders.length ) {
+
+		for ( const localOrder of localOrders ) {
+
+			const { id: localId, ...order } = localOrder;
+			void localId;
+			await createRemoteOrder( order );
+
+		}
+		orders = await loadRemoteOrders( adminKey );
+		localStorage.removeItem( STORAGE_KEY );
+
+	}
+
+}
+
+async function initialize() {
+
+	await initializeData();
 
 	[ elements.search, elements.serviceFilter, elements.sort ].forEach( ( control ) => control.addEventListener( 'input', renderOrders ) );
 	document.addEventListener( 'click', ( event ) => {
@@ -665,19 +744,19 @@ function initialize() {
 		if ( workspaceButton ) setWorkspace( workspaceButton.dataset.workspaceTarget );
 
 	} );
-	elements.list.addEventListener( 'click', ( event ) => {
+	elements.list.addEventListener( 'click', async ( event ) => {
 
 		const viewButton = event.target.closest( '[data-view-order]' );
 		const completeButton = event.target.closest( '[data-complete-order]' );
 		if ( viewButton ) openDetail( viewButton.dataset.viewOrder );
-		if ( completeButton ) updateStatus( completeButton.dataset.completeOrder, 'completed', true );
+		if ( completeButton ) await updateStatus( completeButton.dataset.completeOrder, 'completed', true );
 		if ( event.target.closest( '[data-reset-filters]' ) ) resetFilters();
 
 	} );
-	elements.list.addEventListener( 'change', ( event ) => {
+	elements.list.addEventListener( 'change', async ( event ) => {
 
 		const select = event.target.closest( '[data-status-select]' );
-		if ( select ) updateStatus( select.dataset.statusSelect, select.value );
+		if ( select ) await updateStatus( select.dataset.statusSelect, select.value );
 
 	} );
 	document.querySelector( '[data-close-detail]' ).addEventListener( 'click', closeDetail );
@@ -691,11 +770,11 @@ function initialize() {
 		if ( event.target === elements.dialog ) closeDetail();
 
 	} );
-	elements.detailBody.addEventListener( 'click', ( event ) => {
+	elements.detailBody.addEventListener( 'click', async ( event ) => {
 
-		if ( event.target.closest( '[data-delete-order]' ) ) deleteOrder( activeOrderId );
+		if ( event.target.closest( '[data-delete-order]' ) ) await deleteOrder( activeOrderId );
 		if ( event.target.closest( '[data-copy-contact]' ) ) copyContact();
-		if ( event.target.closest( '[data-save-progress]' ) ) saveProjectProgress();
+		if ( event.target.closest( '[data-save-progress]' ) ) await saveProjectProgress();
 		if ( event.target.closest( '[data-remove-task]' ) ) event.target.closest( '.task-row' ).remove();
 		if ( event.target.closest( '[data-add-task]' ) ) {
 
@@ -713,7 +792,7 @@ function initialize() {
 
 			const orderId = activeOrderId;
 			closeDetail();
-			updateStatus( orderId, 'completed', true );
+			await updateStatus( orderId, 'completed', true );
 
 		}
 
@@ -724,11 +803,11 @@ function initialize() {
 
 	} );
 	const catalogList = document.querySelector( '[data-catalog-list]' );
-	catalogList.addEventListener( 'click', ( event ) => {
+	catalogList.addEventListener( 'click', async ( event ) => {
 
 		const card = event.target.closest( '.catalog-card' );
 		if ( ! card ) return;
-		if ( event.target.closest( '[data-save-service]' ) ) saveServiceCard( card );
+		if ( event.target.closest( '[data-save-service]' ) ) await saveServiceCard( card );
 		if ( event.target.closest( '[data-remove-package]' ) ) event.target.closest( '.package-row' ).remove();
 		if ( event.target.closest( '[data-add-package]' ) ) {
 
@@ -742,7 +821,7 @@ function initialize() {
 		if ( event.target.closest( '[data-remove-service]' ) && window.confirm( t( 'admin.removeServiceConfirm' ) ) ) {
 
 			catalog = catalog.filter( ( service ) => service.id !== card.dataset.catalogId );
-			saveCatalog( catalog );
+			await saveCatalog( catalog, adminKey );
 			renderLocale();
 			showToast( t( 'admin.productRemoved' ) );
 
@@ -751,21 +830,22 @@ function initialize() {
 	} );
 	document.querySelector( '[data-add-service]' ).addEventListener( 'click', addService );
 	document.querySelector( '[data-save-options]' ).addEventListener( 'click', storeBookingSettings );
-	document.querySelector( '[data-reset-catalog]' ).addEventListener( 'click', () => {
+	document.querySelector( '[data-reset-catalog]' ).addEventListener( 'click', async () => {
 
 		if ( ! window.confirm( t( 'admin.resetCatalogConfirm' ) ) ) return;
 		catalog = getDefaultStudioSettings().services;
-		saveCatalog( catalog );
+		await saveCatalog( catalog, adminKey );
 		renderLocale();
 		showToast( t( 'admin.catalogReset' ) );
 
 	} );
 	document.querySelector( '[data-export]' ).addEventListener( 'click', exportCsv );
-	document.querySelector( '[data-clear-all]' ).addEventListener( 'click', () => {
+	document.querySelector( '[data-clear-all]' ).addEventListener( 'click', async () => {
 
 		if ( ! orders.length || ! window.confirm( t( 'admin.clearConfirm' ) ) ) return;
+		if ( isBackendConfigured() ) await clearRemoteOrders( adminKey );
 		orders = [];
-		saveOrders();
+		if ( ! isBackendConfigured() ) saveLocalOrders();
 		renderDashboard();
 		showToast( t( 'admin.cleared' ) );
 
@@ -774,4 +854,10 @@ function initialize() {
 
 }
 
-initialize();
+initialize().catch( ( error ) => {
+
+	console.error( 'Unable to initialize admin workspace', error );
+	sessionStorage.removeItem( ADMIN_KEY_STORAGE );
+	elements.list.innerHTML = `<div class="admin-empty"><h3>${getLanguage() === 'vi' ? 'Không thể mở dữ liệu quản trị' : 'Unable to open admin data'}</h3><p>${escapeHtml( error.message )}</p></div>`;
+
+} );

@@ -6,13 +6,15 @@ import {
 	PROJECT_TYPES,
 	SERVICES,
 	STYLE_OPTIONS,
+	initializeStudioData,
 	getPackage,
 	getService
 } from './data.js';
+import { createRemoteOrder, isBackendConfigured } from './backend.js';
 import { renderProjects } from './projects.js';
 import { getLanguage, initializePreferences, localizeValue, t } from './preferences.js';
-import { gsap } from '../../node_modules/gsap/index.js';
-import { ScrollTrigger } from '../../node_modules/gsap/ScrollTrigger.js';
+import { gsap } from 'gsap';
+import { ScrollTrigger } from 'gsap/ScrollTrigger';
 
 gsap.registerPlugin( ScrollTrigger );
 
@@ -352,26 +354,30 @@ function renderSummary() {
 
 function renderSuccess() {
 
-	if ( ! savedInquiryId ) {
+	return `<div class="booking-step success-screen"><div><i class="success-mark"></i><p class="booking-kicker">${t( 'booking.ready' )}</p><h2 id="booking-title">${t( 'booking.successTitle' )}</h2><p>${t( 'booking.successText' )}</p><button class="button button-primary" type="button" data-back-home>${t( 'booking.home' )}</button></div></div>`;
 
-		const timestamp = new Date().toISOString();
-		const order = { ...state, id: `inquiry-${Date.now()}`, status: 'new', timestamp };
-		savedInquiryId = order.id;
-		try {
+}
 
-			const existing = JSON.parse( localStorage.getItem( 'portfolio_orders' ) || '[]' );
-			existing.push( order );
-			localStorage.setItem( 'portfolio_orders', JSON.stringify( existing ) );
+async function persistInquiry() {
 
-		} catch ( e ) {
+	const timestamp = new Date().toISOString();
+	const order = {
+		...state,
+		files: state.files.map( ( file ) => ( { name: file.name, size: file.size, type: file.type } ) ),
+		status: 'new',
+		timestamp
+	};
+	if ( isBackendConfigured() ) {
 
-			console.error( 'Failed to save order locally', e );
-
-		}
+		savedInquiryId = await createRemoteOrder( order );
+		return;
 
 	}
-
-	return `<div class="booking-step success-screen"><div><i class="success-mark"></i><p class="booking-kicker">${t( 'booking.ready' )}</p><h2 id="booking-title">${t( 'booking.successTitle' )}</h2><p>${t( 'booking.successText' )}</p><button class="button button-primary" type="button" data-back-home>${t( 'booking.home' )}</button></div></div>`;
+	order.id = `inquiry-${Date.now()}`;
+	const existing = JSON.parse( localStorage.getItem( 'portfolio_orders' ) || '[]' );
+	existing.push( order );
+	localStorage.setItem( 'portfolio_orders', JSON.stringify( existing ) );
+	savedInquiryId = order.id;
 
 }
 
@@ -538,7 +544,7 @@ function validateCurrentStep() {
 
 }
 
-function goToNextStep() {
+async function goToNextStep() {
 
 	const error = validateCurrentStep();
 	if ( error ) {
@@ -548,6 +554,23 @@ function goToNextStep() {
 
 	}
 
+	if ( currentStep === BOOKING_STEPS && ! savedInquiryId ) {
+
+		elements.nextButton.disabled = true;
+		try {
+
+			await persistInquiry();
+
+		} catch ( saveError ) {
+
+			console.error( 'Unable to submit project request', saveError );
+			elements.formError.textContent = t( 'error.save' );
+			elements.nextButton.disabled = false;
+			return;
+
+		}
+
+	}
 	currentStep = Math.min( currentStep + 1, BOOKING_STEPS + 1 );
 	renderBookingStep();
 
@@ -633,21 +656,28 @@ function initializePricing() {
 
 }
 
-renderServices();
-renderProjects();
-renderPricing();
-initializeRevealObserver();
-initializeNavigation();
-initializeAccordion();
-initializePricing();
-initializeBooking();
-initializeScene();
-initializeFooterAnimation();
-initializePreferences( () => {
+async function initialize() {
 
+	await initializeStudioData();
 	renderServices();
 	renderProjects();
 	renderPricing();
-	if ( elements.dialog.open ) renderBookingStep();
+	initializeRevealObserver();
+	initializeNavigation();
+	initializeAccordion();
+	initializePricing();
+	initializeBooking();
+	initializeScene();
+	initializeFooterAnimation();
+	initializePreferences( () => {
 
-} );
+		renderServices();
+		renderProjects();
+		renderPricing();
+		if ( elements.dialog.open ) renderBookingStep();
+
+	} );
+
+}
+
+initialize().catch( ( error ) => console.error( 'Unable to initialize Pozan Market', error ) );
