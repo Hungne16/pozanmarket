@@ -45,6 +45,63 @@ const serviceIcons = [
 	'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20 20 4M5 5h6v6H5zM13 13h6v6h-6z"/></svg>'
 ];
 
+const SERVICE_PROFILES = {
+	website: {
+		label: 'WEB SYSTEM',
+		skills: { en: [ 'Content architecture', 'Responsive UI', 'Frontend engineering', 'Three.js & GSAP' ], vi: [ 'Kiến trúc nội dung', 'UI responsive', 'Lập trình frontend', 'Three.js & GSAP' ] },
+		outputs: { en: [ 'Production-ready website', 'SEO & performance foundation', 'Reusable component system' ], vi: [ 'Website sẵn sàng vận hành', 'Nền tảng SEO & hiệu năng', 'Hệ thống component tái sử dụng' ] }
+	},
+	landing: {
+		label: 'CONVERSION',
+		skills: { en: [ 'Conversion strategy', 'Visual storytelling', 'Motion direction', 'Analytics-ready UI' ], vi: [ 'Chiến lược chuyển đổi', 'Kể chuyện thị giác', 'Định hướng chuyển động', 'UI sẵn sàng đo lường' ] },
+		outputs: { en: [ 'Focused campaign page', 'Clear CTA journey', 'Launch-ready responsive build' ], vi: [ 'Trang chiến dịch tập trung', 'Hành trình CTA rõ ràng', 'Bản responsive sẵn sàng ra mắt' ] }
+	},
+	uiux: {
+		label: 'PRODUCT DESIGN',
+		skills: { en: [ 'User flows', 'Wireframes', 'Interactive prototypes', 'Design systems' ], vi: [ 'Luồng người dùng', 'Wireframe', 'Prototype tương tác', 'Design system' ] },
+		outputs: { en: [ 'Validated screen structure', 'Developer-ready Figma', 'Scalable UI library' ], vi: [ 'Cấu trúc màn hình được kiểm chứng', 'Figma sẵn sàng bàn giao', 'Thư viện UI có thể mở rộng' ] }
+	},
+	presentation: {
+		label: 'STORY SYSTEM',
+		skills: { en: [ 'Narrative structure', 'Information hierarchy', 'Data visualization', 'Slide animation' ], vi: [ 'Cấu trúc câu chuyện', 'Phân cấp thông tin', 'Trực quan hóa dữ liệu', 'Hiệu ứng slide' ] },
+		outputs: { en: [ 'Persuasive slide deck', 'Editable master template', 'Presentation-ready assets' ], vi: [ 'Bộ slide thuyết phục', 'Master template chỉnh sửa được', 'Tài nguyên sẵn sàng thuyết trình' ] }
+	},
+	canva: {
+		label: 'BRAND TOOLKIT',
+		skills: { en: [ 'Brand consistency', 'Modular templates', 'Social formats', 'Team-friendly systems' ], vi: [ 'Nhất quán thương hiệu', 'Template mô-đun', 'Định dạng mạng xã hội', 'Hệ thống dễ dùng cho đội ngũ' ] },
+		outputs: { en: [ 'Reusable Canva kit', 'Organized brand assets', 'Usage-ready templates' ], vi: [ 'Bộ Canva tái sử dụng', 'Tài nguyên thương hiệu có tổ chức', 'Template dùng được ngay' ] }
+	},
+	poster: {
+		label: 'KEY VISUAL',
+		skills: { en: [ 'Art direction', 'Typography', 'Image composition', 'Campaign adaptation' ], vi: [ 'Art direction', 'Typography', 'Bố cục hình ảnh', 'Ứng dụng cho chiến dịch' ] },
+		outputs: { en: [ 'Distinct key visual', 'Platform-specific exports', 'Editable source files' ], vi: [ 'Key visual khác biệt', 'File xuất theo từng nền tảng', 'File nguồn chỉnh sửa được' ] }
+	},
+	other: {
+		label: 'CUSTOM R&D',
+		skills: { en: [ 'Product discovery', 'Rapid prototyping', 'Automation', 'Custom integrations' ], vi: [ 'Khám phá sản phẩm', 'Prototype nhanh', 'Tự động hóa', 'Tích hợp tùy chỉnh' ] },
+		outputs: { en: [ 'Defined technical scope', 'Working proof of concept', 'A practical delivery roadmap' ], vi: [ 'Phạm vi kỹ thuật rõ ràng', 'Bản thử nghiệm hoạt động', 'Lộ trình triển khai thực tế' ] }
+	}
+};
+
+let destroyServiceCardScenes = () => {};
+let serviceSceneVersion = 0;
+
+function profileValues( values ) {
+
+	return values[ getLanguage() === 'vi' ? 'vi' : 'en' ];
+
+}
+
+async function refreshServiceCardScenes() {
+
+	const version = ++ serviceSceneVersion;
+	const { initializeServiceCardScenes } = await import( './service-card-scenes.js' );
+	if ( version !== serviceSceneVersion ) return;
+	destroyServiceCardScenes();
+	destroyServiceCardScenes = initializeServiceCardScenes( elements.services );
+
+}
+
 const elements = {
 	header: document.querySelector( '[data-header]' ),
 	menuToggle: document.querySelector( '.menu-toggle' ),
@@ -81,13 +138,27 @@ function escapeHtml( value ) {
 function renderServices() {
 
 	elements.services.innerHTML = SERVICES.map( ( service, index ) => `
-		<article class="service-card is-visible" data-reveal>
-			<div class="service-top"><span class="service-code">${service.code || String( index + 1 ).padStart( 2, '0' )} / ${String( SERVICES.length ).padStart( 2, '0' )}</span><span class="service-icon">${serviceIcons[ index % serviceIcons.length ]}</span></div>
-			<h3>${localizeValue( service.name )}</h3>
-			<p>${localizeValue( service.description )}</p>
-			<div class="service-bottom"><span>${t( 'service.starting' )} · ${service.price}</span><button type="button" aria-label="${t( 'service.configure' )} ${localizeValue( service.name )}" data-service-booking="${service.id}">↗</button></div>
+		<article class="service-card service-card-expanded is-visible" data-reveal data-service-id="${escapeHtml( service.id )}">
+			<div class="service-visual" aria-hidden="true">
+				<canvas data-service-scene="${index}"></canvas>
+				<span class="service-visual-icon">${serviceIcons[ index % serviceIcons.length ]}</span>
+				<span class="service-visual-label">${SERVICE_PROFILES[ service.id ]?.label || SERVICE_PROFILES.other.label}</span>
+				<span class="service-visual-coordinates">PM / 0${index + 1}</span>
+			</div>
+			<div class="service-card-copy">
+				<div class="service-top"><span class="service-code">${service.code || String( index + 1 ).padStart( 2, '0' )} / ${String( SERVICES.length ).padStart( 2, '0' )}</span><span>${t( 'service.fullCycle' )}</span></div>
+				<h3>${localizeValue( service.name )}</h3>
+				<p class="service-description">${localizeValue( service.description )}</p>
+				<div class="service-knowledge">
+					<div><small>${t( 'service.skills' )}</small><div class="service-tags">${profileValues( ( SERVICE_PROFILES[ service.id ] || SERVICE_PROFILES.other ).skills ).map( ( skill ) => `<span>${escapeHtml( skill )}</span>` ).join( '' )}</div></div>
+					<div><small>${t( 'service.outputs' )}</small><ul>${profileValues( ( SERVICE_PROFILES[ service.id ] || SERVICE_PROFILES.other ).outputs ).map( ( output ) => `<li>${escapeHtml( output )}</li>` ).join( '' )}</ul></div>
+				</div>
+				<div class="service-pipeline" aria-label="${t( 'service.pipeline' )}"><span>01 ${t( 'service.discover' )}</span><i></i><span>02 ${t( 'service.design' )}</span><i></i><span>03 ${t( 'service.deliver' )}</span></div>
+				<div class="service-bottom"><span>${t( 'service.starting' )} · ${service.price}</span><button type="button" aria-label="${t( 'service.configure' )} ${localizeValue( service.name )}" data-service-booking="${service.id}">${t( 'service.explore' )} <b aria-hidden="true">↗</b></button></div>
+			</div>
 		</article>
 	` ).join( '' );
+	refreshServiceCardScenes().catch( ( error ) => console.warn( 'Service card 3D scenes unavailable', error ) );
 
 }
 
