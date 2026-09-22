@@ -17,12 +17,14 @@ import {
 	isBackendConfigured,
 	loadRemoteOrders,
 	removeRemoteOrder,
+	subscribeRemoteOrders,
 	updateRemoteOrder
 } from './backend.js';
 import { getLanguage, initializePreferences, localizeValue, t } from './preferences.js';
 
 const STORAGE_KEY = 'portfolio_orders';
 const ADMIN_KEY_STORAGE = 'pozan_admin_key';
+const NOTIFICATION_SEEN_KEY = 'pozan_admin_notifications_seen';
 const STATUS_OPTIONS = [
 	{ value: 'new', key: 'admin.status.new' },
 	{ value: 'contacted', key: 'admin.status.contacted' },
@@ -48,7 +50,12 @@ const elements = {
 	dialog: document.querySelector( '[data-detail-dialog]' ),
 	detailTitle: document.querySelector( '[data-detail-title]' ),
 	detailBody: document.querySelector( '[data-detail-body]' ),
-	toast: document.querySelector( '[data-toast]' )
+	toast: document.querySelector( '[data-toast]' ),
+	notificationCenter: document.querySelector( '[data-notification-center]' ),
+	notificationToggle: document.querySelector( '[data-notification-toggle]' ),
+	notificationPanel: document.querySelector( '[data-notification-panel]' ),
+	notificationCount: document.querySelector( '[data-notification-count]' ),
+	notificationList: document.querySelector( '[data-notification-list]' )
 };
 
 let orders = [];
@@ -64,6 +71,9 @@ let activeView = 'all';
 let activeWorkspace = 'projects';
 let toastTimer = 0;
 let adminKey = '';
+let notificationSeenAt = Number( localStorage.getItem( NOTIFICATION_SEEN_KEY ) ) || 0;
+let liveOrdersReady = false;
+let unsubscribeOrders = null;
 
 function escapeHtml( value ) {
 
@@ -120,6 +130,57 @@ function formatDate( value, includeTime = false ) {
 		day: '2-digit', month: 'short', year: 'numeric',
 		...( includeTime ? { hour: '2-digit', minute: '2-digit' } : {} )
 	} ).format( date );
+
+}
+
+function timestampOf( order ) {
+
+	return new Date( order.timestamp || 0 ).getTime() || 0;
+
+}
+
+function unreadOrders() {
+
+	return orders.filter( ( order ) => order.status === 'new' && timestampOf( order ) > notificationSeenAt );
+
+}
+
+function renderNotifications() {
+
+	const unread = unreadOrders();
+	elements.notificationCount.textContent = unread.length > 99 ? '99+' : unread.length;
+	elements.notificationCount.hidden = unread.length === 0;
+	elements.notificationToggle.classList.toggle( 'has-unread', unread.length > 0 );
+	const recent = [ ...orders ].sort( ( first, second ) => timestampOf( second ) - timestampOf( first ) ).slice( 0, 8 );
+	elements.notificationList.innerHTML = recent.length ? recent.map( ( order ) => `
+		<button class="notification-item ${timestampOf( order ) > notificationSeenAt && order.status === 'new' ? 'is-unread' : ''}" type="button" data-notification-order="${escapeHtml( order.id )}">
+			<span class="notification-avatar">${escapeHtml( initials( order.name ) )}</span>
+			<span><strong>${escapeHtml( order.name || t( 'admin.unnamed' ) )}</strong><small>${escapeHtml( serviceName( order.service ) )} · ${escapeHtml( formatDate( order.timestamp, true ) )}</small></span>
+			<i aria-hidden="true"></i>
+		</button>` ).join( '' ) : `<div class="notification-empty"><strong>${t( 'admin.noNotifications' )}</strong><span>${t( 'admin.noNotificationsText' )}</span></div>`;
+
+}
+
+function markNotificationsRead() {
+
+	notificationSeenAt = Math.max( Date.now(), ...orders.map( timestampOf ) );
+	localStorage.setItem( NOTIFICATION_SEEN_KEY, String( notificationSeenAt ) );
+	renderNotifications();
+
+}
+
+function announceNewOrders( incoming ) {
+
+	if ( ! incoming.length ) return;
+	const newest = incoming.sort( ( first, second ) => timestampOf( second ) - timestampOf( first ) )[ 0 ];
+	showToast( incoming.length === 1 ? `${t( 'admin.newRequestFrom' )} ${newest.name || t( 'admin.unnamed' )}` : `${incoming.length} ${t( 'admin.newRequestsArrived' )}` );
+	elements.notificationToggle.classList.remove( 'is-ringing' );
+	requestAnimationFrame( () => elements.notificationToggle.classList.add( 'is-ringing' ) );
+	if ( 'Notification' in window && Notification.permission === 'granted' ) {
+
+		new Notification( 'Pozan Market', { body: `${t( 'admin.newRequestFrom' )} ${newest.name || t( 'admin.unnamed' )}`, tag: `project-${newest.id}` } );
+
+	}
 
 }
 
@@ -264,11 +325,13 @@ function renderOrders() {
 				<h3>${escapeHtml( localizeValue( order.goal ) || serviceName( order.service ) )}</h3>
 				<p>${escapeHtml( requestSummary( order ) )}</p>
 				<div class="project-tags">
+					${order.priority && order.priority !== 'normal' ? `<span class="priority-tag priority-${escapeHtml( order.priority )}">${escapeHtml( t( `admin.priority.${order.priority}` ) )}</span>` : ''}
 					${order.projectType ? `<span>${escapeHtml( localizeValue( order.projectType ) )}</span>` : ''}
 					${order.style ? `<span>${escapeHtml( localizeValue( order.style ) )}</span>` : ''}
 					${order.contentStatus ? `<span>${escapeHtml( localizeValue( order.contentStatus ) )}</span>` : ''}
 				</div>
 				${! [ 'completed', 'archived' ].includes( order.status ) ? progressSummary( order ) : ''}
+				${order.nextAction && ! [ 'completed', 'archived' ].includes( order.status ) ? `<p class="next-action-preview"><b>${t( 'admin.next' )}</b> ${escapeHtml( order.nextAction )}${order.nextActionDate ? ` · ${escapeHtml( formatDate( order.nextActionDate ) )}` : ''}</p>` : ''}
 			</div>
 			<div class="project-meta-cell">
 				<div><small>${t( 'admin.service' )}</small><strong>${escapeHtml( serviceName( order.service ) )}</strong><span>${escapeHtml( packageName( order.service, order.package ) )}</span></div>
@@ -288,6 +351,7 @@ function renderDashboard() {
 
 	renderStats();
 	renderOrders();
+	renderNotifications();
 	document.querySelectorAll( '[data-view]' ).forEach( ( button ) => button.classList.toggle( 'is-current', activeWorkspace === 'projects' && button.dataset.view === activeView ) );
 
 }
@@ -304,19 +368,55 @@ function taskRow( task = { label: '', done: false } ) {
 
 }
 
+function milestoneRow( milestone = { title: '', dueDate: '', status: 'planned' } ) {
+
+	return `<div class="milestone-row">
+		<input type="text" value="${escapeHtml( milestone.title )}" placeholder="${t( 'admin.milestoneName' )}" aria-label="${t( 'admin.milestoneName' )}">
+		<input type="date" value="${escapeHtml( milestone.dueDate || '' )}" aria-label="${t( 'admin.milestoneDue' )}">
+		<select aria-label="${t( 'admin.milestoneStatus' )}">
+			<option value="planned" ${milestone.status === 'planned' ? 'selected' : ''}>${t( 'admin.milestone.planned' )}</option>
+			<option value="working" ${milestone.status === 'working' ? 'selected' : ''}>${t( 'admin.milestone.working' )}</option>
+			<option value="review" ${milestone.status === 'review' ? 'selected' : ''}>${t( 'admin.milestone.review' )}</option>
+			<option value="done" ${milestone.status === 'done' ? 'selected' : ''}>${t( 'admin.milestone.done' )}</option>
+		</select>
+		<button class="icon-button" type="button" data-remove-milestone aria-label="${t( 'admin.removeMilestone' )}">×</button>
+	</div>`;
+
+}
+
+function activityTimeline( order ) {
+
+	const activity = Array.isArray( order.activity ) ? order.activity : [];
+	if ( ! activity.length ) return `<p class="activity-empty">${t( 'admin.noActivity' )}</p>`;
+	return activity.slice( 0, 8 ).map( ( item ) => `<div class="activity-item"><i aria-hidden="true"></i><div><strong>${escapeHtml( item.text )}</strong><span>${escapeHtml( formatDate( item.at, true ) )}</span></div></div>` ).join( '' );
+
+}
+
 function progressEditor( order ) {
 
 	const progress = clampProgress( order.progress );
 	const tasks = Array.isArray( order.tasks ) ? order.tasks : [];
+	const milestones = Array.isArray( order.milestones ) ? order.milestones : [];
 	return `
 		<section class="progress-workspace">
 			<div class="progress-workspace-head"><div><p class="admin-eyebrow"><span>DELIVERY</span> / TRACKING</p><h3>${t( 'admin.progressTitle' )}</h3></div><strong class="progress-value" data-progress-value>${progress}%</strong></div>
+			<div class="project-control-grid">
+				<label class="config-field"><span>${t( 'admin.priority' )}</span><select data-project-priority><option value="normal" ${( order.priority || 'normal' ) === 'normal' ? 'selected' : ''}>${t( 'admin.priority.normal' )}</option><option value="high" ${order.priority === 'high' ? 'selected' : ''}>${t( 'admin.priority.high' )}</option><option value="urgent" ${order.priority === 'urgent' ? 'selected' : ''}>${t( 'admin.priority.urgent' )}</option><option value="low" ${order.priority === 'low' ? 'selected' : ''}>${t( 'admin.priority.low' )}</option></select></label>
+				<label class="config-field"><span>${t( 'admin.approval' )}</span><select data-project-approval><option value="not-sent" ${( order.approval || 'not-sent' ) === 'not-sent' ? 'selected' : ''}>${t( 'admin.approval.not-sent' )}</option><option value="pending" ${order.approval === 'pending' ? 'selected' : ''}>${t( 'admin.approval.pending' )}</option><option value="changes" ${order.approval === 'changes' ? 'selected' : ''}>${t( 'admin.approval.changes' )}</option><option value="approved" ${order.approval === 'approved' ? 'selected' : ''}>${t( 'admin.approval.approved' )}</option></select></label>
+				<label class="config-field"><span>${t( 'admin.budget' )}</span><input type="number" min="0" step="100000" value="${escapeHtml( order.budget || '' )}" data-project-budget placeholder="0"></label>
+				<label class="config-field"><span>${t( 'admin.paid' )}</span><input type="number" min="0" step="100000" value="${escapeHtml( order.paid || '' )}" data-project-paid placeholder="0"></label>
+				<label class="config-field project-next-action"><span>${t( 'admin.nextAction' )}</span><input type="text" value="${escapeHtml( order.nextAction || '' )}" data-project-next-action placeholder="${t( 'admin.nextActionPlaceholder' )}"></label>
+				<label class="config-field"><span>${t( 'admin.nextActionDate' )}</span><input type="date" value="${escapeHtml( order.nextActionDate || '' )}" data-project-next-date></label>
+			</div>
 			<div class="progress-controls">
 				<label class="config-field"><span>${t( 'admin.phase' )}</span><select data-project-phase>${progressStages( order.phase || 'discovery' )}</select></label>
 				<label class="config-field"><span>${t( 'admin.targetDate' )}</span><input type="date" value="${escapeHtml( order.targetDate || order.deadline || '' )}" data-project-target></label>
 				<label class="config-field progress-range"><span>${t( 'admin.progress' )}</span><input type="range" min="0" max="100" step="5" value="${progress}" data-project-progress></label>
 				<label class="config-field progress-notes"><span>${t( 'admin.internalNotes' )}</span><textarea rows="4" data-project-notes placeholder="${t( 'admin.internalNotesPlaceholder' )}">${escapeHtml( order.internalNotes || '' )}</textarea></label>
 				<div class="task-editor"><span class="package-editor-label">${t( 'admin.checklist' )}</span><div class="task-list" data-task-list>${tasks.map( taskRow ).join( '' )}</div><div class="task-add"><input type="text" data-new-task placeholder="${t( 'admin.newTaskPlaceholder' )}"><button type="button" data-add-task>+ ${t( 'admin.addTask' )}</button></div></div>
+				<div class="milestone-editor"><div class="editor-title"><span class="package-editor-label">${t( 'admin.milestones' )}</span><button class="text-action" type="button" data-add-milestone>+ ${t( 'admin.addMilestone' )}</button></div><div class="milestone-list" data-milestone-list>${milestones.map( milestoneRow ).join( '' )}</div></div>
+				<label class="config-field resource-links"><span>${t( 'admin.resourceLinks' )}</span><textarea rows="3" data-project-links placeholder="${t( 'admin.resourceLinksPlaceholder' )}">${escapeHtml( ( order.resourceLinks || [] ).join( '\n' ) )}</textarea></label>
+				<div class="activity-editor"><span class="package-editor-label">${t( 'admin.activity' )}</span><div class="activity-add"><input type="text" data-activity-note placeholder="${t( 'admin.activityPlaceholder' )}"></div><div class="activity-timeline">${activityTimeline( order )}</div></div>
 			</div>
 			<button class="admin-button primary" type="button" data-save-progress>${t( 'admin.saveProgress' )}</button>
 		</section>`;
@@ -395,9 +495,17 @@ async function updateStatus( orderId, status, showCompleted = false ) {
 	if ( ! order ) return;
 	order.status = status;
 	order.completedAt = status === 'completed' ? new Date().toISOString() : '';
+	order.activity = Array.isArray( order.activity ) ? order.activity : [];
+	order.activity.unshift( { text: `${t( 'admin.statusChangedTo' )} ${t( `admin.status.${status}` )}`, at: new Date().toISOString() } );
+	if ( status === 'completed' ) {
+
+		order.progress = 100;
+		order.phase = 'delivery';
+
+	}
 	if ( isBackendConfigured() ) {
 
-		await updateRemoteOrder( order.id, { status: order.status, completedAt: order.completedAt }, adminKey );
+		await updateRemoteOrder( order.id, { status: order.status, completedAt: order.completedAt, progress: order.progress, phase: order.phase, activity: order.activity }, adminKey );
 
 	} else {
 
@@ -418,10 +526,25 @@ async function saveProjectProgress() {
 	order.targetDate = elements.detailBody.querySelector( '[data-project-target]' ).value;
 	order.progress = clampProgress( elements.detailBody.querySelector( '[data-project-progress]' ).value );
 	order.internalNotes = elements.detailBody.querySelector( '[data-project-notes]' ).value.trim();
+	order.priority = elements.detailBody.querySelector( '[data-project-priority]' ).value;
+	order.approval = elements.detailBody.querySelector( '[data-project-approval]' ).value;
+	order.budget = Number( elements.detailBody.querySelector( '[data-project-budget]' ).value ) || 0;
+	order.paid = Number( elements.detailBody.querySelector( '[data-project-paid]' ).value ) || 0;
+	order.nextAction = elements.detailBody.querySelector( '[data-project-next-action]' ).value.trim();
+	order.nextActionDate = elements.detailBody.querySelector( '[data-project-next-date]' ).value;
+	order.resourceLinks = elements.detailBody.querySelector( '[data-project-links]' ).value.split( '\n' ).map( ( value ) => value.trim() ).filter( Boolean );
 	order.tasks = [ ...elements.detailBody.querySelectorAll( '.task-row' ) ].map( ( row ) => ( {
 		label: row.querySelector( 'input[type="text"]' ).value.trim(),
 		done: row.querySelector( 'input[type="checkbox"]' ).checked
 	} ) ).filter( ( task ) => task.label );
+	order.milestones = [ ...elements.detailBody.querySelectorAll( '.milestone-row' ) ].map( ( row ) => ( {
+		title: row.querySelector( 'input[type="text"]' ).value.trim(),
+		dueDate: row.querySelector( 'input[type="date"]' ).value,
+		status: row.querySelector( 'select' ).value
+	} ) ).filter( ( milestone ) => milestone.title );
+	const activityNote = elements.detailBody.querySelector( '[data-activity-note]' ).value.trim();
+	order.activity = Array.isArray( order.activity ) ? order.activity : [];
+	if ( activityNote ) order.activity.unshift( { text: activityNote, at: new Date().toISOString() } );
 	if ( [ 'new', 'contacted' ].includes( order.status ) && ( order.progress > 0 || order.phase !== 'discovery' ) ) order.status = 'in-progress';
 	const updates = {
 		phase: order.phase,
@@ -429,6 +552,15 @@ async function saveProjectProgress() {
 		progress: order.progress,
 		internalNotes: order.internalNotes,
 		tasks: order.tasks,
+		milestones: order.milestones,
+		priority: order.priority,
+		approval: order.approval,
+		budget: order.budget,
+		paid: order.paid,
+		nextAction: order.nextAction,
+		nextActionDate: order.nextActionDate,
+		resourceLinks: order.resourceLinks,
+		activity: order.activity,
 		status: order.status
 	};
 	if ( isBackendConfigured() ) {
@@ -478,8 +610,8 @@ function exportCsv() {
 
 	}
 
-	const headers = [ 'Submitted', 'Status', 'Completed', 'Phase', 'Progress', 'Target date', 'Name', 'Email', 'Phone', 'Contact method', 'Service', 'Package', 'Project type', 'Goal', 'Style', 'Content', 'Deadline', 'Requirements', 'Internal notes', 'Tasks' ];
-	const rows = orders.map( ( order ) => [ order.timestamp, order.status, order.completedAt, order.phase, `${clampProgress( order.progress )}%`, order.targetDate, order.name, order.email, order.phone, order.contactMethod, serviceName( order.service ), packageName( order.service, order.package ), order.projectType, order.goal, order.style, order.contentStatus, order.flexibleDeadline ? 'Flexible' : order.deadline, order.requirements, order.internalNotes, ( order.tasks || [] ).map( ( task ) => `${task.done ? '[x]' : '[ ]'} ${task.label}` ).join( ' | ' ) ] );
+	const headers = [ 'Submitted', 'Status', 'Completed', 'Priority', 'Phase', 'Progress', 'Target date', 'Next action', 'Follow-up date', 'Approval', 'Budget', 'Paid', 'Name', 'Email', 'Phone', 'Contact method', 'Service', 'Package', 'Project type', 'Goal', 'Style', 'Content', 'Deadline', 'Requirements', 'Internal notes', 'Tasks', 'Milestones', 'Resource links' ];
+	const rows = orders.map( ( order ) => [ order.timestamp, order.status, order.completedAt, order.priority, order.phase, `${clampProgress( order.progress )}%`, order.targetDate, order.nextAction, order.nextActionDate, order.approval, order.budget, order.paid, order.name, order.email, order.phone, order.contactMethod, serviceName( order.service ), packageName( order.service, order.package ), order.projectType, order.goal, order.style, order.contentStatus, order.flexibleDeadline ? 'Flexible' : order.deadline, order.requirements, order.internalNotes, ( order.tasks || [] ).map( ( task ) => `${task.done ? '[x]' : '[ ]'} ${task.label}` ).join( ' | ' ), ( order.milestones || [] ).map( ( milestone ) => `${milestone.title} (${milestone.status}${milestone.dueDate ? `, ${milestone.dueDate}` : ''})` ).join( ' | ' ), ( order.resourceLinks || [] ).join( ' | ' ) ] );
 	const blob = new Blob( [ `\uFEFF${[ headers, ...rows ].map( ( row ) => row.map( csvCell ).join( ',' ) ).join( '\n' )}` ], { type: 'text/csv;charset=utf-8' } );
 	const url = URL.createObjectURL( blob );
 	const link = Object.assign( document.createElement( 'a' ), { href: url, download: `pozan-market-projects-${new Date().toISOString().slice( 0, 10 )}.csv` } );
@@ -776,6 +908,8 @@ async function initialize() {
 		if ( event.target.closest( '[data-copy-contact]' ) ) copyContact();
 		if ( event.target.closest( '[data-save-progress]' ) ) await saveProjectProgress();
 		if ( event.target.closest( '[data-remove-task]' ) ) event.target.closest( '.task-row' ).remove();
+		if ( event.target.closest( '[data-remove-milestone]' ) ) event.target.closest( '.milestone-row' ).remove();
+		if ( event.target.closest( '[data-add-milestone]' ) ) elements.detailBody.querySelector( '[data-milestone-list]' ).insertAdjacentHTML( 'beforeend', milestoneRow() );
 		if ( event.target.closest( '[data-add-task]' ) ) {
 
 			const input = elements.detailBody.querySelector( '[data-new-task]' );
@@ -840,6 +974,47 @@ async function initialize() {
 
 	} );
 	document.querySelector( '[data-export]' ).addEventListener( 'click', exportCsv );
+	elements.notificationToggle.addEventListener( 'click', () => {
+
+		const open = elements.notificationPanel.hidden;
+		elements.notificationPanel.hidden = ! open;
+		elements.notificationToggle.setAttribute( 'aria-expanded', String( open ) );
+
+	} );
+	document.querySelector( '[data-mark-notifications-read]' ).addEventListener( 'click', markNotificationsRead );
+	document.querySelector( '[data-enable-browser-notifications]' ).addEventListener( 'click', async () => {
+
+		if ( ! ( 'Notification' in window ) ) {
+
+			showToast( t( 'admin.alertsUnsupported' ) );
+			return;
+
+		}
+		const permission = await Notification.requestPermission();
+		showToast( permission === 'granted' ? t( 'admin.alertsEnabled' ) : t( 'admin.alertsBlocked' ) );
+
+	} );
+	elements.notificationList.addEventListener( 'click', ( event ) => {
+
+		const item = event.target.closest( '[data-notification-order]' );
+		if ( ! item ) return;
+		markNotificationsRead();
+		elements.notificationPanel.hidden = true;
+		elements.notificationToggle.setAttribute( 'aria-expanded', 'false' );
+		setWorkspace( 'projects' );
+		openDetail( item.dataset.notificationOrder );
+
+	} );
+	document.addEventListener( 'click', ( event ) => {
+
+		if ( ! elements.notificationCenter.contains( event.target ) ) {
+
+			elements.notificationPanel.hidden = true;
+			elements.notificationToggle.setAttribute( 'aria-expanded', 'false' );
+
+		}
+
+	} );
 	document.querySelector( '[data-clear-all]' ).addEventListener( 'click', async () => {
 
 		if ( ! orders.length || ! window.confirm( t( 'admin.clearConfirm' ) ) ) return;
@@ -851,6 +1026,21 @@ async function initialize() {
 
 	} );
 	initializePreferences( renderLocale );
+	if ( isBackendConfigured() ) {
+
+		unsubscribeOrders = subscribeRemoteOrders( adminKey, ( remoteOrders ) => {
+
+			const knownIds = new Set( orders.map( ( order ) => order.id ) );
+			const incoming = liveOrdersReady ? remoteOrders.filter( ( order ) => ! knownIds.has( order.id ) ) : [];
+			orders = remoteOrders;
+			liveOrdersReady = true;
+			renderDashboard();
+			announceNewOrders( incoming );
+
+		}, ( error ) => console.error( 'Live project updates unavailable', error ) );
+		window.addEventListener( 'beforeunload', () => unsubscribeOrders?.() );
+
+	}
 
 }
 

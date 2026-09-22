@@ -101,7 +101,16 @@ const COPY = {
 		'admin.optionsRequired': 'Each booking group needs at least one option.', 'admin.optionsSaved': 'Booking options saved.', 'admin.catalogReset': 'Default catalog restored.', 'admin.removeServiceConfirm': 'Remove this service and all of its packages?', 'admin.resetCatalogConfirm': 'Restore the original services and prices?',
 		'admin.progressTitle': 'Project delivery progress', 'admin.phase': 'Current phase', 'admin.targetDate': 'Target delivery', 'admin.progress': 'Progress', 'admin.internalNotes': 'Private notes', 'admin.internalNotesPlaceholder': 'Decisions, blockers, client feedback or next action…',
 		'admin.checklist': 'Delivery checklist', 'admin.newTaskPlaceholder': 'Add the next deliverable…', 'admin.addTask': 'Add task', 'admin.saveProgress': 'Save progress', 'admin.progressSaved': 'Project progress saved.', 'admin.taskDone': 'Task completed', 'admin.taskName': 'Task name', 'admin.removeTask': 'Remove task',
-		'admin.phase.discovery': 'Discovery', 'admin.phase.planning': 'Planning', 'admin.phase.design': 'Design', 'admin.phase.development': 'Development', 'admin.phase.review': 'Client review', 'admin.phase.delivery': 'Delivery'
+		'admin.phase.discovery': 'Discovery', 'admin.phase.planning': 'Planning', 'admin.phase.design': 'Design', 'admin.phase.development': 'Development', 'admin.phase.review': 'Client review', 'admin.phase.delivery': 'Delivery',
+		'admin.notifications': 'Notifications', 'admin.notificationTitle': 'New project requests', 'admin.markRead': 'Mark all read', 'admin.enableAlerts': 'Enable browser alerts',
+		'admin.noNotifications': 'No notifications yet', 'admin.noNotificationsText': 'New customer requests will appear here instantly.', 'admin.newRequestFrom': 'New project request from', 'admin.newRequestsArrived': 'new project requests arrived.',
+		'admin.alertsUnsupported': 'Browser notifications are not supported.', 'admin.alertsEnabled': 'Browser alerts enabled.', 'admin.alertsBlocked': 'Notification permission was not granted.',
+		'admin.priority': 'Priority', 'admin.priority.normal': 'Normal', 'admin.priority.high': 'High', 'admin.priority.urgent': 'Urgent', 'admin.priority.low': 'Low',
+		'admin.approval': 'Client approval', 'admin.approval.not-sent': 'Not sent', 'admin.approval.pending': 'Waiting for review', 'admin.approval.changes': 'Changes requested', 'admin.approval.approved': 'Approved',
+		'admin.budget': 'Agreed budget · VND', 'admin.paid': 'Amount paid · VND', 'admin.nextAction': 'Next action', 'admin.nextActionPlaceholder': 'What needs to happen next?', 'admin.nextActionDate': 'Follow-up date', 'admin.next': 'Next',
+		'admin.milestones': 'Project milestones', 'admin.addMilestone': 'Add milestone', 'admin.milestoneName': 'Milestone name', 'admin.milestoneDue': 'Milestone deadline', 'admin.milestoneStatus': 'Milestone status', 'admin.removeMilestone': 'Remove milestone',
+		'admin.milestone.planned': 'Planned', 'admin.milestone.working': 'In progress', 'admin.milestone.review': 'In review', 'admin.milestone.done': 'Done',
+		'admin.resourceLinks': 'Project links · one per line', 'admin.resourceLinksPlaceholder': 'Figma, Drive, staging website, repository…', 'admin.activity': 'Activity log', 'admin.activityPlaceholder': 'Record a decision, client feedback or blocker…', 'admin.noActivity': 'No activity recorded yet.', 'admin.statusChangedTo': 'Status changed to'
 	},
 	vi: {
 		'nav.home': 'Trang chủ', 'nav.services': 'Dịch vụ', 'nav.work': 'Dự án', 'nav.pricing': 'Báo giá', 'nav.about': 'Giới thiệu',
@@ -202,7 +211,16 @@ const COPY = {
 		'admin.optionsRequired': 'Mỗi nhóm cần có ít nhất một lựa chọn.', 'admin.optionsSaved': 'Đã lưu các lựa chọn đặt hàng.', 'admin.catalogReset': 'Đã khôi phục danh mục mặc định.', 'admin.removeServiceConfirm': 'Xoá dịch vụ này cùng toàn bộ gói bên trong?', 'admin.resetCatalogConfirm': 'Khôi phục dịch vụ và mức giá ban đầu?',
 		'admin.progressTitle': 'Tiến độ bàn giao dự án', 'admin.phase': 'Giai đoạn hiện tại', 'admin.targetDate': 'Ngày dự kiến bàn giao', 'admin.progress': 'Mức hoàn thành', 'admin.internalNotes': 'Ghi chú nội bộ', 'admin.internalNotesPlaceholder': 'Quyết định, trở ngại, phản hồi khách hàng hoặc việc tiếp theo…',
 		'admin.checklist': 'Checklist bàn giao', 'admin.newTaskPlaceholder': 'Thêm đầu việc tiếp theo…', 'admin.addTask': 'Thêm việc', 'admin.saveProgress': 'Lưu tiến độ', 'admin.progressSaved': 'Đã lưu tiến độ dự án.', 'admin.taskDone': 'Đã hoàn thành', 'admin.taskName': 'Tên đầu việc', 'admin.removeTask': 'Xoá đầu việc',
-		'admin.phase.discovery': 'Tiếp nhận', 'admin.phase.planning': 'Lập kế hoạch', 'admin.phase.design': 'Thiết kế', 'admin.phase.development': 'Lập trình', 'admin.phase.review': 'Khách hàng duyệt', 'admin.phase.delivery': 'Bàn giao'
+		'admin.phase.discovery': 'Tiếp nhận', 'admin.phase.planning': 'Lập kế hoạch', 'admin.phase.design': 'Thiết kế', 'admin.phase.development': 'Lập trình', 'admin.phase.review': 'Khách hàng duyệt', 'admin.phase.delivery': 'Bàn giao',
+		'admin.notifications': 'Thông báo', 'admin.notificationTitle': 'Yêu cầu dự án mới', 'admin.markRead': 'Đánh dấu đã đọc', 'admin.enableAlerts': 'Bật thông báo trình duyệt',
+		'admin.noNotifications': 'Chưa có thông báo', 'admin.noNotificationsText': 'Yêu cầu mới của khách sẽ xuất hiện ngay tại đây.', 'admin.newRequestFrom': 'Có yêu cầu dự án mới từ', 'admin.newRequestsArrived': 'yêu cầu dự án mới vừa gửi đến.',
+		'admin.alertsUnsupported': 'Trình duyệt không hỗ trợ thông báo.', 'admin.alertsEnabled': 'Đã bật thông báo trình duyệt.', 'admin.alertsBlocked': 'Bạn chưa cấp quyền gửi thông báo.',
+		'admin.priority': 'Mức ưu tiên', 'admin.priority.normal': 'Bình thường', 'admin.priority.high': 'Cao', 'admin.priority.urgent': 'Khẩn cấp', 'admin.priority.low': 'Thấp',
+		'admin.approval': 'Trạng thái khách duyệt', 'admin.approval.not-sent': 'Chưa gửi duyệt', 'admin.approval.pending': 'Đang chờ duyệt', 'admin.approval.changes': 'Yêu cầu chỉnh sửa', 'admin.approval.approved': 'Đã duyệt',
+		'admin.budget': 'Ngân sách đã chốt · VND', 'admin.paid': 'Đã thanh toán · VND', 'admin.nextAction': 'Việc cần làm tiếp', 'admin.nextActionPlaceholder': 'Bước tiếp theo của dự án là gì?', 'admin.nextActionDate': 'Ngày cần xử lý', 'admin.next': 'Tiếp theo',
+		'admin.milestones': 'Các mốc dự án', 'admin.addMilestone': 'Thêm mốc', 'admin.milestoneName': 'Tên mốc', 'admin.milestoneDue': 'Hạn của mốc', 'admin.milestoneStatus': 'Trạng thái mốc', 'admin.removeMilestone': 'Xoá mốc',
+		'admin.milestone.planned': 'Dự kiến', 'admin.milestone.working': 'Đang làm', 'admin.milestone.review': 'Đang duyệt', 'admin.milestone.done': 'Hoàn tất',
+		'admin.resourceLinks': 'Link dự án · mỗi dòng một link', 'admin.resourceLinksPlaceholder': 'Figma, Drive, web thử nghiệm, repository…', 'admin.activity': 'Nhật ký hoạt động', 'admin.activityPlaceholder': 'Ghi lại quyết định, phản hồi hoặc trở ngại…', 'admin.noActivity': 'Chưa có hoạt động nào được ghi lại.', 'admin.statusChangedTo': 'Đã đổi trạng thái thành'
 	}
 };
 

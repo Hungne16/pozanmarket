@@ -52,6 +52,17 @@
 					<p class="admin-date" data-current-date></p>
 				</div>
 				<div class="topbar-actions">
+					<div class="notification-center" data-notification-center>
+						<button class="notification-button" type="button" data-notification-toggle aria-expanded="false" aria-label="Notifications">
+							<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9"></path><path d="M10 21h4"></path></svg>
+							<span data-notification-count hidden>0</span>
+						</button>
+						<div class="notification-panel" data-notification-panel hidden>
+							<header><div><small data-i18n="admin.notifications">Notifications</small><strong data-i18n="admin.notificationTitle">New project requests</strong></div><button type="button" data-mark-notifications-read data-i18n="admin.markRead">Mark all read</button></header>
+							<div class="notification-list" data-notification-list></div>
+							<footer><button type="button" data-enable-browser-notifications data-i18n="admin.enableAlerts">Enable browser alerts</button></footer>
+						</div>
+					</div>
 					<div class="preference-controls">
 						<div class="language-switch" role="group" aria-label="Language"><button type="button" data-language="vi">VIE</button><button type="button" data-language="en">EN</button></div>
 						<button class="theme-toggle" type="button" data-theme-toggle><span class="sun" aria-hidden="true">☀</span><span class="moon" aria-hidden="true">☾</span></button>

@@ -1,8 +1,9 @@
-import { ConvexHttpClient } from 'convex/browser';
+import { ConvexClient, ConvexHttpClient } from 'convex/browser';
 import { makeFunctionReference } from 'convex/server';
 
 const backendUrl = import.meta.env.VITE_CONVEX_URL;
 const client = backendUrl ? new ConvexHttpClient( backendUrl ) : null;
+let liveClient = null;
 
 const functions = {
 	getSettings: makeFunctionReference( 'settings:get' ),
@@ -49,6 +50,14 @@ export async function createRemoteOrder( order ) {
 export async function loadRemoteOrders( adminKey ) {
 
 	return await requireClient().query( functions.listOrders, { adminKey } );
+
+}
+
+export function subscribeRemoteOrders( adminKey, onOrders, onError = console.error ) {
+
+	if ( ! backendUrl ) return () => {};
+	liveClient ||= new ConvexClient( backendUrl, { unsavedChangesWarning: false } );
+	return liveClient.onUpdate( functions.listOrders, { adminKey }, onOrders, onError );
 
 }
 
