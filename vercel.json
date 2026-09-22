@@ -5,6 +5,7 @@
 	"rewrites": [
 		{ "source": "/", "destination": "/portfolio/" },
 		{ "source": "/admin", "destination": "/portfolio/admin" },
-		{ "source": "/portal", "destination": "/portfolio/client" }
+		{ "source": "/portal", "destination": "/portfolio/client" },
+		{ "source": "/client", "destination": "/portfolio/client" }
 	]
 }

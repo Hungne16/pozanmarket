@@ -426,7 +426,8 @@ function renderSummary() {
 
 function renderSuccess() {
 
-	const portalUrl = `./client?project=${encodeURIComponent( savedInquiryId )}&token=${encodeURIComponent( savedTrackingToken )}`;
+	const portalPath = [ 'localhost', '127.0.0.1' ].includes( window.location.hostname ) ? '/portfolio/client' : '/portal';
+	const portalUrl = `${portalPath}?project=${encodeURIComponent( savedInquiryId )}&token=${encodeURIComponent( savedTrackingToken )}`;
 	return `<div class="booking-step success-screen"><div><i class="success-mark"></i><p class="booking-kicker">${t( 'booking.ready' )}</p><h2 id="booking-title">${t( 'booking.successTitle' )}</h2><p>${t( 'booking.successText' )}</p><div class="success-portal"><small>${t( 'booking.portalReady' )}</small><strong>${t( 'booking.portalKeepLink' )}</strong><a class="button button-primary" href="${portalUrl}">${t( 'booking.openPortal' )} <span aria-hidden="true">↗</span></a></div><button class="summary-edit" type="button" data-back-home>${t( 'booking.home' )}</button></div></div>`;
 
 }

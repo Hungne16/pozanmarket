@@ -895,7 +895,8 @@ async function copyClientPortal() {
 		else saveLocalOrders();
 
 	}
-	const url = new URL( './client', window.location.href );
+	const localHost = [ 'localhost', '127.0.0.1' ].includes( window.location.hostname );
+	const url = new URL( localHost ? '/portfolio/client' : '/portal', window.location.origin );
 	url.searchParams.set( 'project', order.id );
 	url.searchParams.set( 'token', order.trackingToken );
 	try {
