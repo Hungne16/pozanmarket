@@ -139,8 +139,8 @@ function renderServices() {
 
 	elements.services.innerHTML = SERVICES.map( ( service, index ) => `
 		<article class="service-card service-card-expanded is-visible" data-reveal data-service-id="${escapeHtml( service.id )}">
-			<div class="service-visual" aria-hidden="true">
-				<canvas data-service-scene="${escapeHtml( service.id )}"></canvas>
+			<div class="service-visual ${service.image ? 'has-custom-image' : ''}" aria-hidden="true">
+				${service.image ? `<img class="service-visual-image" src="${escapeHtml( service.image )}" alt="">` : `<canvas data-service-scene="${escapeHtml( service.id )}"></canvas>`}
 				<span class="service-visual-icon">${serviceIcons[ index % serviceIcons.length ]}</span>
 				<span class="service-visual-label">${SERVICE_PROFILES[ service.id ]?.label || SERVICE_PROFILES.other.label}</span>
 				<span class="service-visual-coordinates">PM / 0${index + 1}</span>

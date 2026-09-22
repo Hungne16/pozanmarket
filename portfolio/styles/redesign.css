@@ -143,6 +143,12 @@ body { background: var(--bg); }
 .service-visual::before { inset: 0; background-image: linear-gradient(rgba(255,255,255,.045) 1px, transparent 1px), linear-gradient(90deg,rgba(255,255,255,.045) 1px, transparent 1px); background-size: 32px 32px; mask-image: linear-gradient(to bottom, black, transparent); }
 .service-visual::after { inset: 18px; border: 1px solid rgba(184,172,255,.12); border-radius: 50%; transform: scaleX(1.5); }
 .service-visual canvas { position: absolute; z-index: 1; inset: 0; width: 100%; height: 100%; }
+.service-visual-image { position: absolute; z-index: 1; inset: 0; width: 100%; height: 100%; object-fit: cover; transition: transform .6s cubic-bezier(.2,.7,.2,1), filter .4s; }
+.service-visual.has-custom-image::before { z-index: 2; background: linear-gradient(180deg,rgba(8,8,12,.08),transparent 48%,rgba(8,8,12,.7)); mask-image: none; }
+.service-card-expanded:hover .service-visual-image { transform: scale(1.035); filter: saturate(1.06) contrast(1.03); }
+.service-visual.has-custom-image .service-visual-icon,
+.service-visual.has-custom-image .service-visual-label,
+.service-visual.has-custom-image .service-visual-coordinates { z-index: 3; }
 .service-visual-icon { position: absolute; z-index: 2; top: 18px; left: 18px; display: grid; place-items: center; width: 38px; height: 38px; border: 1px solid var(--line); border-radius: 10px; background: rgba(10,10,14,.45); backdrop-filter: blur(12px); }
 .service-visual-icon svg { width: 17px; height: 17px; fill: none; stroke: var(--accent-bright); stroke-width: 1.35; }
 .service-visual-label,

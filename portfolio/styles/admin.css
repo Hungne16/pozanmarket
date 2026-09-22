@@ -204,6 +204,17 @@ button.admin-button { cursor: pointer; }
 .management-actions { display: flex; gap: 9px; flex: 0 0 auto; }
 .catalog-list { display: grid; gap: 16px; }
 .catalog-card { padding: clamp(22px, 2vw, 34px); border: 1px solid var(--line); background: rgba(16,18,24,.76); }
+.service-image-editor { display: grid; grid-template-columns: minmax(240px,.72fr) minmax(220px,1.28fr); gap: 22px; align-items: center; margin-bottom: 24px; padding-bottom: 24px; border-bottom: 1px solid var(--line); }
+.service-image-preview { position: relative; display: grid; place-items: center; min-height: 180px; aspect-ratio: 16 / 8.5; overflow: hidden; border: 1px dashed var(--line-strong); background: radial-gradient(circle at 50% 42%,rgba(118,103,255,.13),transparent 36%),rgba(255,255,255,.018); }
+.service-image-preview img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+.service-image-preview > div { display: grid; justify-items: center; gap: 7px; color: var(--muted); text-align: center; }
+.service-image-preview span { color: var(--accent-bright); font-size: 26px; }
+.service-image-preview strong { color: var(--text); font-size: 12px; }
+.service-image-preview small { max-width: 230px; font-size: 10px; line-height: 1.45; }
+.service-image-actions { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+.service-image-actions label { cursor: pointer; }
+.service-image-actions input { position: absolute; width: 1px; height: 1px; opacity: 0; pointer-events: none; }
+.service-image-actions > small { flex-basis: 100%; color: var(--muted); font-size: 10px; line-height: 1.55; }
 .catalog-card-head { display: grid; grid-template-columns: 58px minmax(220px,.7fr) minmax(240px,1.3fr) auto; gap: 18px; align-items: end; }
 .catalog-number { display: grid; place-items: center; width: 48px; height: 48px; border: 1px solid rgba(157,148,255,.32); color: var(--accent-bright); font: 600 11px 'Space Grotesk',sans-serif; }
 .config-field { display: grid; gap: 8px; min-width: 0; }
@@ -269,6 +280,7 @@ button.admin-button { cursor: pointer; }
 
 :root[data-theme='light'] .catalog-card,
 :root[data-theme='light'] .option-editor-grid .config-field { background: rgba(255,255,255,.72); }
+:root[data-theme='light'] .service-image-preview { background: radial-gradient(circle at 50% 42%,rgba(118,103,255,.1),transparent 36%),rgba(255,255,255,.7); }
 :root[data-theme='light'] .config-field input,
 :root[data-theme='light'] .config-field textarea,
 :root[data-theme='light'] .config-field select,
@@ -322,6 +334,7 @@ button.admin-button { cursor: pointer; }
 	.project-actions { grid-column: 1 / -1; }
 	.management-hero { align-items: flex-start; flex-direction: column; }
 	.catalog-card-head { grid-template-columns: 48px 1fr; }
+	.service-image-editor { grid-template-columns: 1fr; }
 	.catalog-card-head > .config-field:nth-child(3) { grid-column: 1 / -1; }
 	.catalog-card-head > .admin-button { grid-column: 1 / -1; }
 	.package-row { grid-template-columns: 1fr 1fr 38px; }
@@ -365,6 +378,7 @@ button.admin-button { cursor: pointer; }
 	.admin-toast { right: 16px; bottom: 16px; left: 16px; text-align: center; }
 	.management-actions { display: grid; width: 100%; grid-template-columns: 1fr; }
 	.catalog-card-head { grid-template-columns: 1fr; }
+	.service-image-preview { min-height: 150px; }
 	.catalog-card-head > * { grid-column: auto !important; }
 	.package-row { grid-template-columns: 1fr 38px; }
 	.package-row .config-field { grid-column: 1; }

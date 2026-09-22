@@ -639,10 +639,50 @@ function packageRow( packageItem ) {
 
 }
 
+function serviceImageEditor( service ) {
+
+	return `<div class="service-image-editor ${service.image ? 'has-image' : ''}">
+		<div class="service-image-preview">${service.image ? `<img src="${escapeHtml( service.image )}" alt="">` : `<div><span aria-hidden="true">◇</span><strong>${t( 'admin.noServiceImage' )}</strong><small>${t( 'admin.threeFallback' )}</small></div>`}</div>
+		<div class="service-image-actions">
+			<label class="admin-button secondary"><input type="file" accept="image/jpeg,image/png,image/webp" data-service-image><span>${service.image ? t( 'admin.replaceImage' ) : t( 'admin.uploadImage' )}</span></label>
+			${service.image ? `<button class="text-action danger" type="button" data-remove-service-image>${t( 'admin.removeImage' )}</button>` : ''}
+			<small>${t( 'admin.imageHint' )}</small>
+		</div>
+	</div>`;
+
+}
+
+async function compressServiceImage( file ) {
+
+	if ( ! file.type.startsWith( 'image/' ) ) throw new Error( t( 'admin.imageTypeError' ) );
+	if ( file.size > 12 * 1024 * 1024 ) throw new Error( t( 'admin.imageSizeError' ) );
+	const bitmap = await createImageBitmap( file );
+	let scale = Math.min( 1, 1600 / bitmap.width, 1000 / bitmap.height );
+	let quality = .82;
+	let dataUrl = '';
+	for ( let attempt = 0; attempt < 8; attempt ++ ) {
+
+		const canvas = document.createElement( 'canvas' );
+		canvas.width = Math.max( 1, Math.round( bitmap.width * scale ) );
+		canvas.height = Math.max( 1, Math.round( bitmap.height * scale ) );
+		canvas.getContext( '2d', { alpha: false } ).drawImage( bitmap, 0, 0, canvas.width, canvas.height );
+		dataUrl = canvas.toDataURL( 'image/webp', quality );
+		if ( dataUrl.length <= 120000 ) break;
+		scale *= .82;
+		quality = Math.max( .55, quality - .05 );
+
+	}
+	bitmap.close?.();
+	if ( dataUrl.length > 150000 ) throw new Error( t( 'admin.imageCompressError' ) );
+	return dataUrl;
+
+}
+
 function catalogCard( service, index ) {
 
 	return `
 		<article class="catalog-card" data-catalog-id="${escapeHtml( service.id )}">
+			${serviceImageEditor( service )}
 			<div class="catalog-card-head">
 				<span class="catalog-number">${String( index + 1 ).padStart( 2, '0' )}</span>
 				<label class="config-field"><span>${t( 'admin.serviceName' )}</span><input value="${escapeHtml( service.name )}" data-service-name></label>
@@ -942,6 +982,16 @@ async function initialize() {
 		const card = event.target.closest( '.catalog-card' );
 		if ( ! card ) return;
 		if ( event.target.closest( '[data-save-service]' ) ) await saveServiceCard( card );
+		if ( event.target.closest( '[data-remove-service-image]' ) ) {
+
+			const service = readServiceCard( card );
+			delete service.image;
+			catalog[ catalog.findIndex( ( item ) => item.id === service.id ) ] = service;
+			await saveCatalog( catalog, adminKey );
+			renderCatalog();
+			showToast( t( 'admin.imageRemoved' ) );
+
+		}
 		if ( event.target.closest( '[data-remove-package]' ) ) event.target.closest( '.package-row' ).remove();
 		if ( event.target.closest( '[data-add-package]' ) ) {
 
@@ -958,6 +1008,33 @@ async function initialize() {
 			await saveCatalog( catalog, adminKey );
 			renderLocale();
 			showToast( t( 'admin.productRemoved' ) );
+
+		}
+
+	} );
+	catalogList.addEventListener( 'change', async ( event ) => {
+
+		const input = event.target.closest( '[data-service-image]' );
+		if ( ! input?.files?.[ 0 ] ) return;
+		const card = input.closest( '.catalog-card' );
+		const service = readServiceCard( card );
+		const label = input.nextElementSibling;
+		try {
+
+			input.disabled = true;
+			label.textContent = t( 'admin.processingImage' );
+			service.image = await compressServiceImage( input.files[ 0 ] );
+			catalog[ catalog.findIndex( ( item ) => item.id === service.id ) ] = service;
+			await saveCatalog( catalog, adminKey );
+			renderCatalog();
+			showToast( t( 'admin.imageSaved' ) );
+
+		} catch ( error ) {
+
+			console.error( 'Unable to save service image', error );
+			input.disabled = false;
+			label.textContent = service.image ? t( 'admin.replaceImage' ) : t( 'admin.uploadImage' );
+			showToast( error.message || t( 'admin.imageSaveError' ) );
 
 		}
 
