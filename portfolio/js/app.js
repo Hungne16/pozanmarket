@@ -123,6 +123,7 @@ let currentStep = 0;
 let activePricingCategory = 'landing';
 let hasLoadedScene = false;
 let savedInquiryId = '';
+let savedTrackingToken = '';
 
 function escapeHtml( value ) {
 
@@ -425,15 +426,18 @@ function renderSummary() {
 
 function renderSuccess() {
 
-	return `<div class="booking-step success-screen"><div><i class="success-mark"></i><p class="booking-kicker">${t( 'booking.ready' )}</p><h2 id="booking-title">${t( 'booking.successTitle' )}</h2><p>${t( 'booking.successText' )}</p><button class="button button-primary" type="button" data-back-home>${t( 'booking.home' )}</button></div></div>`;
+	const portalUrl = `./client.html?project=${encodeURIComponent( savedInquiryId )}&token=${encodeURIComponent( savedTrackingToken )}`;
+	return `<div class="booking-step success-screen"><div><i class="success-mark"></i><p class="booking-kicker">${t( 'booking.ready' )}</p><h2 id="booking-title">${t( 'booking.successTitle' )}</h2><p>${t( 'booking.successText' )}</p><div class="success-portal"><small>${t( 'booking.portalReady' )}</small><strong>${t( 'booking.portalKeepLink' )}</strong><a class="button button-primary" href="${portalUrl}">${t( 'booking.openPortal' )} <span aria-hidden="true">↗</span></a></div><button class="summary-edit" type="button" data-back-home>${t( 'booking.home' )}</button></div></div>`;
 
 }
 
 async function persistInquiry() {
 
 	const timestamp = new Date().toISOString();
+	savedTrackingToken = crypto.randomUUID().replaceAll( '-', '' );
 	const order = {
 		...state,
+		trackingToken: savedTrackingToken,
 		files: state.files.map( ( file ) => ( { name: file.name, size: file.size, type: file.type } ) ),
 		status: 'new',
 		timestamp
@@ -650,6 +654,7 @@ async function goToNextStep() {
 function openBooking( serviceId = '', packageId = '' ) {
 
 	savedInquiryId = '';
+	savedTrackingToken = '';
 	if ( serviceId && getService( serviceId ) ) {
 
 		state.service = serviceId;

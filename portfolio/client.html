@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="vi">
+	<head>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		<meta name="theme-color" content="#08090d">
+		<meta name="description" content="Theo dõi tiến độ dự án Pozan Market.">
+		<title>Client Portal — Pozan Market</title>
+		<link rel="preconnect" href="https://fonts.googleapis.com">
+		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+		<link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@75..125,300..800&family=Space+Grotesk:wght@400;500;600&display=swap" rel="stylesheet">
+		<link rel="stylesheet" href="./styles.css">
+		<link rel="stylesheet" href="./styles/preferences.css">
+		<link rel="stylesheet" href="./styles/client.css">
+		<script type="module" src="./js/client.js"></script>
+	</head>
+	<body class="client-page">
+		<div class="page-noise" aria-hidden="true"></div>
+		<header class="client-header">
+			<a class="brand" href="./" aria-label="Pozan Market"><span class="brand-mark" aria-hidden="true"><i></i><i></i></span><span>POZAN MARKET</span></a>
+			<div class="client-header-meta"><span class="live-indicator"><i></i><span data-i18n="client.live">Live project workspace</span></span><div class="preference-controls"><div class="language-switch" role="group" aria-label="Language"><button type="button" data-language="vi">VIE</button><button type="button" data-language="en">EN</button></div><button class="theme-toggle" type="button" data-theme-toggle aria-label="Theme"><span class="sun" aria-hidden="true">☀</span><span class="moon" aria-hidden="true">☾</span></button></div></div>
+		</header>
+		<main class="client-main" data-client-root>
+			<section class="client-state"><div class="client-loader" aria-hidden="true"></div><p data-i18n="client.loading">Loading your project…</p></section>
+		</main>
+		<footer class="client-footer"><span>POZAN MARKET / CLIENT PORTAL</span><a href="./" data-i18n="client.backSite">Back to website ↗</a></footer>
+		<div class="client-toast" role="status" aria-live="polite" data-client-toast></div>
+	</body>
+</html>

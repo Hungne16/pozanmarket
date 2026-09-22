@@ -184,6 +184,18 @@ function announceNewOrders( incoming ) {
 
 }
 
+function announceClientResponses( remoteOrders ) {
+
+	const previous = new Map( orders.map( ( order ) => [ order.id, order ] ) );
+	const responses = remoteOrders.filter( ( order ) => order.clientFeedbackAt && previous.get( order.id )?.clientFeedbackAt !== order.clientFeedbackAt );
+	if ( ! responses.length ) return;
+	const latest = responses[ 0 ];
+	const message = `${latest.name || t( 'admin.unnamed' )} ${t( 'admin.clientResponded' )}`;
+	showToast( message );
+	if ( 'Notification' in window && Notification.permission === 'granted' ) new Notification( 'Pozan Market', { body: message, tag: `feedback-${latest.id}` } );
+
+}
+
 function initials( name ) {
 
 	return String( name || '?' ).trim().split( /\s+/ ).slice( 0, 2 ).map( ( part ) => part[ 0 ] ).join( '' ).toUpperCase();
@@ -326,6 +338,7 @@ function renderOrders() {
 				<p>${escapeHtml( requestSummary( order ) )}</p>
 				<div class="project-tags">
 					${order.priority && order.priority !== 'normal' ? `<span class="priority-tag priority-${escapeHtml( order.priority )}">${escapeHtml( t( `admin.priority.${order.priority}` ) )}</span>` : ''}
+					${[ 'approved', 'changes' ].includes( order.approval ) ? `<span class="approval-tag approval-${escapeHtml( order.approval )}">${escapeHtml( t( `admin.approval.${order.approval}` ) )}</span>` : ''}
 					${order.projectType ? `<span>${escapeHtml( localizeValue( order.projectType ) )}</span>` : ''}
 					${order.style ? `<span>${escapeHtml( localizeValue( order.style ) )}</span>` : ''}
 					${order.contentStatus ? `<span>${escapeHtml( localizeValue( order.contentStatus ) )}</span>` : ''}
@@ -413,6 +426,7 @@ function progressEditor( order ) {
 				<label class="config-field"><span>${t( 'admin.targetDate' )}</span><input type="date" value="${escapeHtml( order.targetDate || order.deadline || '' )}" data-project-target></label>
 				<label class="config-field progress-range"><span>${t( 'admin.progress' )}</span><input type="range" min="0" max="100" step="5" value="${progress}" data-project-progress></label>
 				<label class="config-field progress-notes"><span>${t( 'admin.internalNotes' )}</span><textarea rows="4" data-project-notes placeholder="${t( 'admin.internalNotesPlaceholder' )}">${escapeHtml( order.internalNotes || '' )}</textarea></label>
+				<label class="config-field client-message"><span>${t( 'admin.clientUpdate' )}</span><textarea rows="3" data-client-message placeholder="${t( 'admin.clientUpdatePlaceholder' )}">${escapeHtml( order.clientMessage || '' )}</textarea><small>${t( 'admin.clientUpdateHint' )}</small></label>
 				<div class="task-editor"><span class="package-editor-label">${t( 'admin.checklist' )}</span><div class="task-list" data-task-list>${tasks.map( taskRow ).join( '' )}</div><div class="task-add"><input type="text" data-new-task placeholder="${t( 'admin.newTaskPlaceholder' )}"><button type="button" data-add-task>+ ${t( 'admin.addTask' )}</button></div></div>
 				<div class="milestone-editor"><div class="editor-title"><span class="package-editor-label">${t( 'admin.milestones' )}</span><button class="text-action" type="button" data-add-milestone>+ ${t( 'admin.addMilestone' )}</button></div><div class="milestone-list" data-milestone-list>${milestones.map( milestoneRow ).join( '' )}</div></div>
 				<label class="config-field resource-links"><span>${t( 'admin.resourceLinks' )}</span><textarea rows="3" data-project-links placeholder="${t( 'admin.resourceLinksPlaceholder' )}">${escapeHtml( ( order.resourceLinks || [] ).join( '\n' ) )}</textarea></label>
@@ -448,11 +462,13 @@ function openDetail( orderId ) {
 			${detailItem( t( 'admin.submitted' ), formatDate( order.timestamp, true ) )}
 			${detailItem( t( 'admin.files' ), order.files?.length ? `${order.files.length} ${t( 'admin.fileRefs' )}` : t( 'admin.noFiles' ) )}
 		</div>
+		${order.clientFeedbackAt ? `<section class="client-feedback-card"><span>${t( 'admin.clientResponseTitle' )}</span><strong>${t( `admin.approval.${order.approval || 'changes'}` )}</strong><p>${escapeHtml( order.clientFeedback || t( 'admin.noClientComment' ) )}</p><small>${t( 'admin.clientResponseAt' )} ${escapeHtml( formatDate( order.clientFeedbackAt, true ) )}</small></section>` : ''}
 		${order.status !== 'archived' ? progressEditor( order ) : ''}
 		<div class="detail-actions">
 			${! [ 'completed', 'archived' ].includes( order.status ) ? `<button class="admin-button complete-button" type="button" data-mark-completed>${t( 'admin.markProjectCompleted' )} ✓</button>` : ''}
 			${order.email ? `<a class="admin-button primary" href="mailto:${escapeHtml( order.email )}">${t( 'admin.emailClient' )} ↗</a>` : ''}
 			${order.phone ? `<a class="admin-button secondary" href="tel:${escapeHtml( order.phone )}">${t( 'admin.callClient' )}</a>` : ''}
+			<button class="admin-button secondary" type="button" data-copy-portal>${t( 'admin.copyPortal' )}</button>
 			<button class="admin-button secondary" type="button" data-copy-contact>${t( 'admin.copyContact' )}</button>
 			<button class="admin-button danger-button" type="button" data-delete-order>${t( 'admin.delete' )}</button>
 		</div>`;
@@ -526,6 +542,7 @@ async function saveProjectProgress() {
 	order.targetDate = elements.detailBody.querySelector( '[data-project-target]' ).value;
 	order.progress = clampProgress( elements.detailBody.querySelector( '[data-project-progress]' ).value );
 	order.internalNotes = elements.detailBody.querySelector( '[data-project-notes]' ).value.trim();
+	order.clientMessage = elements.detailBody.querySelector( '[data-client-message]' ).value.trim();
 	order.priority = elements.detailBody.querySelector( '[data-project-priority]' ).value;
 	order.approval = elements.detailBody.querySelector( '[data-project-approval]' ).value;
 	order.budget = Number( elements.detailBody.querySelector( '[data-project-budget]' ).value ) || 0;
@@ -551,6 +568,7 @@ async function saveProjectProgress() {
 		targetDate: order.targetDate,
 		progress: order.progress,
 		internalNotes: order.internalNotes,
+		clientMessage: order.clientMessage,
 		tasks: order.tasks,
 		milestones: order.milestones,
 		priority: order.priority,
@@ -866,6 +884,33 @@ async function copyContact() {
 
 }
 
+async function copyClientPortal() {
+
+	const order = orders.find( ( item ) => item.id === activeOrderId );
+	if ( ! order ) return;
+	if ( ! order.trackingToken ) {
+
+		order.trackingToken = crypto.randomUUID().replaceAll( '-', '' );
+		if ( isBackendConfigured() ) await updateRemoteOrder( order.id, { trackingToken: order.trackingToken }, adminKey );
+		else saveLocalOrders();
+
+	}
+	const url = new URL( './client.html', window.location.href );
+	url.searchParams.set( 'project', order.id );
+	url.searchParams.set( 'token', order.trackingToken );
+	try {
+
+		await navigator.clipboard.writeText( url.href );
+		showToast( t( 'admin.portalCopied' ) );
+
+	} catch {
+
+		window.prompt( t( 'admin.copyPortalPrompt' ), url.href );
+
+	}
+
+}
+
 async function initializeData() {
 
 	await initializeStudioData();
@@ -946,6 +991,7 @@ async function initialize() {
 
 		if ( event.target.closest( '[data-delete-order]' ) ) await deleteOrder( activeOrderId );
 		if ( event.target.closest( '[data-copy-contact]' ) ) copyContact();
+		if ( event.target.closest( '[data-copy-portal]' ) ) await copyClientPortal();
 		if ( event.target.closest( '[data-save-progress]' ) ) await saveProjectProgress();
 		if ( event.target.closest( '[data-remove-task]' ) ) event.target.closest( '.task-row' ).remove();
 		if ( event.target.closest( '[data-remove-milestone]' ) ) event.target.closest( '.milestone-row' ).remove();
@@ -1109,6 +1155,7 @@ async function initialize() {
 
 			const knownIds = new Set( orders.map( ( order ) => order.id ) );
 			const incoming = liveOrdersReady ? remoteOrders.filter( ( order ) => ! knownIds.has( order.id ) ) : [];
+			if ( liveOrdersReady ) announceClientResponses( remoteOrders );
 			orders = remoteOrders;
 			liveOrdersReady = true;
 			renderDashboard();
