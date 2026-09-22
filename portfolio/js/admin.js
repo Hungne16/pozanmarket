@@ -980,7 +980,7 @@ async function initializeData() {
 		return;
 
 	}
-	adminKey = localStorage.getItem( ADMIN_KEY_STORAGE ) || sessionStorage.getItem( ADMIN_KEY_STORAGE ) || window.prompt( getLanguage() === 'vi' ? 'Nhập mã quản trị Pozan Market' : 'Enter the Pozan Market admin key' ) || '';
+	adminKey = localStorage.getItem( ADMIN_KEY_STORAGE ) || window.prompt( getLanguage() === 'vi' ? 'Nhập mã quản trị Pozan Market' : 'Enter the Pozan Market admin key' ) || '';
 	if ( ! adminKey ) throw new Error( 'Admin key is required.' );
 	localStorage.setItem( ADMIN_KEY_STORAGE, adminKey );
 	sessionStorage.removeItem( ADMIN_KEY_STORAGE );
