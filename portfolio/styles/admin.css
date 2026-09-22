@@ -79,7 +79,7 @@
 .notification-item small { color: var(--muted); font-size: 10px; }
 .notification-item i { width: 6px; height: 6px; border-radius: 50%; background: transparent; }
 .notification-item.is-unread i { background: #ff647d; box-shadow: 0 0 10px rgba(255,100,125,.7); }
-.notification-panel > footer { padding: 13px 18px; }
+.notification-panel > footer { display: flex; justify-content: space-between; gap: 14px; padding: 13px 18px; }
 .notification-empty { display: grid; gap: 6px; padding: 34px 18px; color: var(--text); text-align: center; }
 .notification-empty span { color: var(--muted); font-size: 11px; }
 .admin-button {

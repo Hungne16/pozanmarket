@@ -1,4 +1,5 @@
 import { mutation, query } from './_generated/server.js';
+import { internal } from './_generated/api.js';
 import { v } from 'convex/values';
 
 function assertAdmin( adminKey ) {
@@ -54,7 +55,7 @@ export const create = mutation( {
 	handler: async ( ctx, { order } ) => {
 
 		const now = Date.now();
-		return await ctx.db.insert( 'orders', {
+		const id = await ctx.db.insert( 'orders', {
 			data: {
 				...order,
 				status: 'new',
@@ -62,6 +63,12 @@ export const create = mutation( {
 			},
 			updatedAt: now
 		} );
+		await ctx.scheduler.runAfter( 0, internal.notifications.sendNewOrder, {
+			orderId: id,
+			name: String( order.name || 'Khách hàng mới' ).slice( 0, 120 ),
+			service: String( order.service || 'Dự án mới' ).slice( 0, 120 )
+		} );
+		return id;
 
 	}
 } );

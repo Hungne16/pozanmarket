@@ -16,6 +16,7 @@ import {
 	createRemoteOrder,
 	isBackendConfigured,
 	loadRemoteOrders,
+	registerRemotePushSubscription,
 	removeRemoteOrder,
 	subscribeRemoteOrders,
 	updateRemoteOrder
@@ -25,6 +26,7 @@ import { getLanguage, initializePreferences, localizeValue, t } from './preferen
 const STORAGE_KEY = 'portfolio_orders';
 const ADMIN_KEY_STORAGE = 'pozan_admin_key';
 const NOTIFICATION_SEEN_KEY = 'pozan_admin_notifications_seen';
+const VAPID_PUBLIC_KEY = 'BH-ATT8AR3agx7iOOwJRg9KLzPo2fVau0aJL7vjYFFLJYv_0el3BiuIj3_k6U-QJByAvgCdeOoLtOR8Sjr3q88E';
 const STATUS_OPTIONS = [
 	{ value: 'new', key: 'admin.status.new' },
 	{ value: 'contacted', key: 'admin.status.contacted' },
@@ -74,6 +76,7 @@ let adminKey = '';
 let notificationSeenAt = Number( localStorage.getItem( NOTIFICATION_SEEN_KEY ) ) || 0;
 let liveOrdersReady = false;
 let unsubscribeOrders = null;
+let deferredInstallPrompt = null;
 
 function escapeHtml( value ) {
 
@@ -179,6 +182,47 @@ function announceNewOrders( incoming ) {
 	if ( 'Notification' in window && Notification.permission === 'granted' ) {
 
 		new Notification( 'Pozan Market', { body: `${t( 'admin.newRequestFrom' )} ${newest.name || t( 'admin.unnamed' )}`, tag: `project-${newest.id}` } );
+
+	}
+
+}
+
+function decodeVapidKey( value ) {
+
+	const padding = '='.repeat( ( 4 - value.length % 4 ) % 4 );
+	const decoded = atob( ( value + padding ).replaceAll( '-', '+' ).replaceAll( '_', '/' ) );
+	return Uint8Array.from( decoded, ( character ) => character.charCodeAt( 0 ) );
+
+}
+
+async function enablePushNotifications() {
+
+	if ( ! isBackendConfigured() || ! ( 'serviceWorker' in navigator ) || ! ( 'PushManager' in window ) || ! ( 'Notification' in window ) ) {
+
+		showToast( t( 'admin.pushUnsupported' ) );
+		return;
+
+	}
+	const permission = await Notification.requestPermission();
+	if ( permission !== 'granted' ) {
+
+		showToast( t( 'admin.alertsBlocked' ) );
+		return;
+
+	}
+	try {
+
+		const registration = await navigator.serviceWorker.register( '/sw.js', { scope: '/' } );
+		let subscription = await registration.pushManager.getSubscription();
+		subscription ||= await registration.pushManager.subscribe( { userVisibleOnly: true, applicationServerKey: decodeVapidKey( VAPID_PUBLIC_KEY ) } );
+		await registerRemotePushSubscription( subscription.toJSON(), adminKey );
+		localStorage.setItem( 'pozan_push_enabled', '1' );
+		showToast( t( 'admin.pushEnabled' ) );
+
+	} catch ( error ) {
+
+		console.error( 'Unable to enable push notifications', error );
+		showToast( t( 'admin.pushError' ) );
 
 	}
 
@@ -1114,16 +1158,21 @@ async function initialize() {
 
 	} );
 	document.querySelector( '[data-mark-notifications-read]' ).addEventListener( 'click', markNotificationsRead );
-	document.querySelector( '[data-enable-browser-notifications]' ).addEventListener( 'click', async () => {
+	document.querySelector( '[data-enable-browser-notifications]' ).addEventListener( 'click', enablePushNotifications );
+	const installButton = document.querySelector( '[data-install-admin]' );
+	window.addEventListener( 'beforeinstallprompt', ( event ) => {
 
-		if ( ! ( 'Notification' in window ) ) {
+		event.preventDefault();
+		deferredInstallPrompt = event;
+		installButton.hidden = false;
 
-			showToast( t( 'admin.alertsUnsupported' ) );
-			return;
+	} );
+	installButton.addEventListener( 'click', async () => {
 
-		}
-		const permission = await Notification.requestPermission();
-		showToast( permission === 'granted' ? t( 'admin.alertsEnabled' ) : t( 'admin.alertsBlocked' ) );
+		if ( ! deferredInstallPrompt ) return;
+		await deferredInstallPrompt.prompt();
+		deferredInstallPrompt = null;
+		installButton.hidden = true;
 
 	} );
 	elements.notificationList.addEventListener( 'click', ( event ) => {
@@ -1158,6 +1207,7 @@ async function initialize() {
 
 	} );
 	initializePreferences( renderLocale );
+	if ( 'serviceWorker' in navigator ) navigator.serviceWorker.register( '/sw.js', { scope: '/' } ).catch( ( error ) => console.warn( 'Admin service worker unavailable', error ) );
 	if ( isBackendConfigured() ) {
 
 		unsubscribeOrders = subscribeRemoteOrders( adminKey, ( remoteOrders ) => {
@@ -1174,6 +1224,8 @@ async function initialize() {
 		window.addEventListener( 'beforeunload', () => unsubscribeOrders?.() );
 
 	}
+	const requestedOrderId = new URLSearchParams( window.location.search ).get( 'open' );
+	if ( requestedOrderId && orders.some( ( order ) => order.id === requestedOrderId ) ) openDetail( requestedOrderId );
 
 }
 

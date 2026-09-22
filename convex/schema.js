@@ -10,5 +10,11 @@ export default defineSchema( {
 		key: v.string(),
 		value: v.any(),
 		updatedAt: v.number()
-	} ).index( 'by_key', [ 'key' ] )
+	} ).index( 'by_key', [ 'key' ] ),
+	pushSubscriptions: defineTable( {
+		endpoint: v.string(),
+		subscription: v.any(),
+		createdAt: v.number(),
+		updatedAt: v.number()
+	} ).index( 'by_endpoint', [ 'endpoint' ] )
 } );

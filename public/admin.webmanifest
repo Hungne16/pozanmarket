@@ -1,0 +1,13 @@
+{
+	"name": "Pozan Market Admin",
+	"short_name": "Pozan Admin",
+	"description": "Quản lý yêu cầu và tiến độ dự án Pozan Market.",
+	"start_url": "/admin",
+	"scope": "/",
+	"display": "standalone",
+	"background_color": "#08090d",
+	"theme_color": "#7667ff",
+	"icons": [
+		{ "src": "/admin-icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable" }
+	]
+}

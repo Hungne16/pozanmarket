@@ -5,7 +5,11 @@
 		<meta name="viewport" content="width=device-width, initial-scale=1">
 		<meta name="theme-color" content="#08090d">
 		<meta name="description" content="Pozan Market project inquiry dashboard.">
+		<meta name="apple-mobile-web-app-capable" content="yes">
+		<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 		<title>Project Dashboard — Pozan Market</title>
+		<link rel="manifest" href="/admin.webmanifest">
+		<link rel="apple-touch-icon" href="/admin-icon.svg">
 		<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 32 32%22><rect width=%2232%22 height=%2232%22 rx=%226%22 fill=%22%237667ff%22/><path d=%22M9 9h14v14H9z%22 fill=%22none%22 stroke=%22white%22 stroke-width=%222%22 transform=%22rotate(45 16 16)%22/></svg>">
 		<link rel="preconnect" href="https://fonts.googleapis.com">
 		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -60,7 +64,7 @@
 						<div class="notification-panel" data-notification-panel hidden>
 							<header><div><small data-i18n="admin.notifications">Notifications</small><strong data-i18n="admin.notificationTitle">New project requests</strong></div><button type="button" data-mark-notifications-read data-i18n="admin.markRead">Mark all read</button></header>
 							<div class="notification-list" data-notification-list></div>
-							<footer><button type="button" data-enable-browser-notifications data-i18n="admin.enableAlerts">Enable browser alerts</button></footer>
+							<footer><button type="button" data-enable-browser-notifications data-i18n="admin.enableAlerts">Enable browser alerts</button><button type="button" data-install-admin hidden data-i18n="admin.installApp">Install Admin app</button></footer>
 						</div>
 					</div>
 					<div class="preference-controls">

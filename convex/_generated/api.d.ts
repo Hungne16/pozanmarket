@@ -8,7 +8,9 @@
  * @module
  */
 
+import type * as notifications from "../notifications.js";
 import type * as orders from "../orders.js";
+import type * as pushSubscriptions from "../pushSubscriptions.js";
 import type * as settings from "../settings.js";
 
 import type {
@@ -18,7 +20,9 @@ import type {
 } from "convex/server";
 
 declare const fullApi: ApiFromModules<{
+  notifications: typeof notifications;
   orders: typeof orders;
+  pushSubscriptions: typeof pushSubscriptions;
   settings: typeof settings;
 }>;
 

@@ -14,7 +14,8 @@ const functions = {
 	removeOrder: makeFunctionReference( 'orders:remove' ),
 	clearOrders: makeFunctionReference( 'orders:clear' ),
 	clientView: makeFunctionReference( 'orders:clientView' ),
-	clientRespond: makeFunctionReference( 'orders:clientRespond' )
+	clientRespond: makeFunctionReference( 'orders:clientRespond' ),
+	registerPushSubscription: makeFunctionReference( 'pushSubscriptions:register' )
 };
 
 function requireClient() {
@@ -98,5 +99,11 @@ export function subscribeClientProject( id, trackingToken, onProject, onError = 
 	if ( ! backendUrl ) return () => {};
 	liveClient ||= new ConvexClient( backendUrl, { unsavedChangesWarning: false } );
 	return liveClient.onUpdate( functions.clientView, { id, trackingToken }, onProject, onError );
+
+}
+
+export async function registerRemotePushSubscription( subscription, adminKey ) {
+
+	return await requireClient().mutation( functions.registerPushSubscription, { subscription, adminKey } );
 
 }

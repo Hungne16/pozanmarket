@@ -40,6 +40,8 @@ test/unit/build
 !/convex/**
 !/portfolio/
 !/portfolio/**
+!/public/
+!/public/**
 !/build/
 /build/*
 !/build/three.module.js
