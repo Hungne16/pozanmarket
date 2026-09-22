@@ -58,13 +58,21 @@
 .success-screen > div > .summary-edit { margin-top: 10px; }
 .skip-upload { margin-top: 18px; padding: 5px 0; border: 0; border-bottom: 1px solid var( --line-strong ); background: none; color: var( --muted ); font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; }
 .form-error { min-height: 22px; width: min( 1040px, calc( 100vw - 56px ) ); margin: 0 auto; color: #ff91a5; font-size: 12px; }
+.booking-question { margin-top: 42px; padding-top: 28px; border-top: 1px solid var( --line ); }
+.booking-question > h3 { margin: 0 0 18px; color: #c8cdd9; font-size: 11px; font-weight: 650; letter-spacing: .11em; text-transform: uppercase; }
+.booking-service-grid { grid-template-columns: repeat( 4, 1fr ); }
+.package-question { margin-top: 34px; }
+.creative-brief-grid, .contact-review-grid { display: grid; grid-template-columns: 1.15fr .85fr; gap: 28px; margin-top: 34px; padding-top: 30px; border-top: 1px solid var( --line ); }
+.compact-upload { min-height: 190px; padding: 24px; }
+.compact-summary { align-self: start; }
+.compact-summary .summary-item { min-height: 82px; }
 .booking-actions { display: flex; justify-content: space-between; min-height: 88px; padding: 17px 34px; border-top: 1px solid var( --line ); background: rgba( 8, 9, 13, 0.92 ); }.booking-actions .button { min-width: 150px; }
 
 @keyframes dialog-in { from { opacity: 0; transform: scale( 0.985 ); } to { opacity: 1; transform: scale( 1 ); } }
 @keyframes step-in { from { opacity: 0; transform: translateY( 18px ); } to { opacity: 1; transform: translateY( 0 ); } }
 
 @media ( max-width: 780px ) {
-	.booking-header { grid-template-columns: 1fr auto; min-height: 84px; padding: 14px 18px; }.booking-progress { position: absolute; right: 0; bottom: 0; left: 0; }.booking-header > div:first-child { display: grid; gap: 2px; }.dialog-close { grid-column: 2; grid-row: 1; }.booking-content { width: calc( 100vw - 28px ); padding-top: 44px; }.booking-step h2 { margin-bottom: 38px; font-size: clamp( 38px, 11vw, 58px ); }.choice-grid, .choice-grid.compact, .choice-grid.styles { grid-template-columns: repeat( 2, 1fr ); }.package-grid { grid-template-columns: 1fr; }.package-grid .choice-card { min-height: 190px; }.field-row, .date-row { grid-template-columns: 1fr; }.booking-actions { min-height: 78px; padding: 12px 14px; }.booking-actions .button { min-width: 112px; min-height: 50px; padding: 0 17px; }.form-error { width: calc( 100vw - 28px ); }
+	.booking-header { grid-template-columns: 1fr auto; min-height: 84px; padding: 14px 18px; }.booking-progress { position: absolute; right: 0; bottom: 0; left: 0; }.booking-header > div:first-child { display: grid; gap: 2px; }.dialog-close { grid-column: 2; grid-row: 1; }.booking-content { width: calc( 100vw - 28px ); padding-top: 44px; }.booking-step h2 { margin-bottom: 38px; font-size: clamp( 38px, 11vw, 58px ); }.choice-grid, .choice-grid.compact, .choice-grid.styles, .booking-service-grid { grid-template-columns: repeat( 2, 1fr ); }.package-grid { grid-template-columns: 1fr; }.package-grid .choice-card { min-height: 190px; }.field-row, .date-row, .creative-brief-grid, .contact-review-grid { grid-template-columns: 1fr; }.booking-actions { min-height: 78px; padding: 12px 14px; }.booking-actions .button { min-width: 112px; min-height: 50px; padding: 0 17px; }.form-error { width: calc( 100vw - 28px ); }
 }
 
 @media ( max-width: 460px ) {

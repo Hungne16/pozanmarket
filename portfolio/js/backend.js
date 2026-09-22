@@ -9,6 +9,7 @@ const functions = {
 	getSettings: makeFunctionReference( 'settings:get' ),
 	saveSettings: makeFunctionReference( 'settings:save' ),
 	createOrder: makeFunctionReference( 'orders:create' ),
+	generateUploadUrl: makeFunctionReference( 'orders:generateUploadUrl' ),
 	listOrders: makeFunctionReference( 'orders:list' ),
 	updateOrder: makeFunctionReference( 'orders:update' ),
 	removeOrder: makeFunctionReference( 'orders:remove' ),
@@ -47,6 +48,16 @@ export async function saveRemoteSettings( key, value, adminKey ) {
 export async function createRemoteOrder( order ) {
 
 	return await requireClient().mutation( functions.createOrder, { order } );
+
+}
+
+export async function uploadRemoteProjectFile( file ) {
+
+	const uploadUrl = await requireClient().mutation( functions.generateUploadUrl, {} );
+	const response = await fetch( uploadUrl, { method: 'POST', headers: { 'Content-Type': file.type || 'application/octet-stream' }, body: file } );
+	if ( ! response.ok ) throw new Error( `Unable to upload ${file.name}.` );
+	const { storageId } = await response.json();
+	return { name: file.name, size: file.size, type: file.type, storageId };
 
 }
 

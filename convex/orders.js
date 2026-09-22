@@ -73,13 +73,27 @@ export const create = mutation( {
 	}
 } );
 
+export const generateUploadUrl = mutation( {
+	args: {},
+	handler: async ( ctx ) => await ctx.storage.generateUploadUrl()
+} );
+
 export const list = query( {
 	args: { adminKey: v.string() },
 	handler: async ( ctx, { adminKey } ) => {
 
 		assertAdmin( adminKey );
 		const documents = await ctx.db.query( 'orders' ).order( 'desc' ).collect();
-		return documents.map( presentOrder );
+		return await Promise.all( documents.map( async ( document ) => {
+
+			const order = presentOrder( document );
+			order.files = await Promise.all( ( order.files || [] ).map( async ( file ) => ( {
+				...file,
+				url: file.storageId ? await ctx.storage.getUrl( file.storageId ) : file.url || ''
+			} ) ) );
+			return order;
+
+		} ) );
 
 	}
 } );
@@ -137,6 +151,8 @@ export const remove = mutation( {
 	handler: async ( ctx, { adminKey, id } ) => {
 
 		assertAdmin( adminKey );
+		const existing = await ctx.db.get( id );
+		await Promise.all( ( existing?.data?.files || [] ).filter( ( file ) => file.storageId ).map( ( file ) => ctx.storage.delete( file.storageId ) ) );
 		await ctx.db.delete( id );
 
 	}
@@ -148,7 +164,10 @@ export const clear = mutation( {
 
 		assertAdmin( adminKey );
 		const documents = await ctx.db.query( 'orders' ).collect();
-		await Promise.all( documents.map( ( document ) => ctx.db.delete( document._id ) ) );
+		await Promise.all( documents.flatMap( ( document ) => [
+			...( document.data.files || [] ).filter( ( file ) => file.storageId ).map( ( file ) => ctx.storage.delete( file.storageId ) ),
+			ctx.db.delete( document._id )
+		] ) );
 
 	}
 } );

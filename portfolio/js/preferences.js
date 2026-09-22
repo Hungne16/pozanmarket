@@ -60,6 +60,8 @@ const COPY = {
 		'booking.timingKicker': '09 / Timing', 'booking.timingTitle': 'When do you <em>need it?</em>', 'booking.deadline': 'Preferred deadline', 'booking.flexible': 'My deadline is flexible',
 		'booking.contactKicker': '10 / Contact', 'booking.contactTitle': 'How can I <em>reach you?</em>', 'booking.name': 'Name *', 'booking.email': 'Email',
 		'booking.phone': 'Phone / Zalo', 'booking.yourName': 'Your name', 'booking.yourPhone': 'Your phone number', 'booking.preferred': 'Preferred contact method',
+		'booking.otherDetails': 'Tell me what “Other” means for this project', 'booking.otherPlaceholder': 'A short description helps me understand the request.',
+		'booking.uploadRealHint': 'Files are securely uploaded with your request · 10 MB each', 'booking.budgetRange': 'Planned budget', 'booking.budgetTimingTitle': 'What budget and <em>timeline</em> work for you?',
 		'booking.reviewKicker': 'Review / Project summary', 'booking.reviewTitle': 'Everything looks <em>right?</em>', 'booking.service': 'Service', 'booking.package': 'Package',
 		'booking.estimate': 'Estimated price', 'booking.projectType': 'Project type', 'booking.goal': 'Goal', 'booking.style': 'Style', 'booking.contact': 'Contact', 'booking.notesShort': 'Notes',
 		'booking.edit': 'Edit project details', 'booking.ready': 'Project brief ready', 'booking.successTitle': 'Awesome.<br><em>Let’s make something great.</em>',
@@ -68,6 +70,7 @@ const COPY = {
 		'booking.complete': 'Complete', 'booking.summary': 'Summary', 'booking.step': 'Step', 'booking.submit': 'Submit project <span aria-hidden="true">↗</span>',
 		'error.choose': 'Please choose one option to continue.', 'error.deadline': 'Choose a preferred deadline or mark it as flexible.', 'error.name': 'Please enter your name.',
 		'error.contact': 'Enter at least an email or phone / Zalo number.', 'error.email': 'Please enter a valid email address.', 'error.method': 'Choose your preferred contact method.', 'error.save': 'Unable to submit right now. Please try again.',
+		'error.chooseServicePackage': 'Choose a service and package to continue.', 'error.otherDetails': 'Please briefly describe your “Other” selection.', 'error.budget': 'Choose a planned budget range.', 'error.emailRequired': 'Enter an email address for email contact.', 'error.phoneRequired': 'Enter a phone number for Phone or Zalo contact.',
 		'error.file': 'Files larger than 10 MB were not added.', 'date.flexible': 'Flexible', 'date.none': 'Not specified',
 		'admin.workspace': 'Workspace', 'admin.all': 'All projects', 'admin.new': 'New inquiries', 'admin.active': 'In progress', 'admin.completed': 'Completed', 'admin.archived': 'Archived',
 		'admin.viewSite': 'View site <span aria-hidden="true">↗</span>', 'admin.local': 'Local workspace', 'admin.localNote': 'Data is stored on this browser only.',
@@ -185,6 +188,8 @@ const COPY = {
 		'booking.timingKicker': '09 / Thời gian', 'booking.timingTitle': 'Khi nào bạn <em>cần sản phẩm?</em>', 'booking.deadline': 'Deadline mong muốn', 'booking.flexible': 'Deadline của tôi có thể linh hoạt',
 		'booking.contactKicker': '10 / Liên hệ', 'booking.contactTitle': 'Tôi có thể <em>liên hệ với bạn</em> bằng cách nào?', 'booking.name': 'Tên *', 'booking.email': 'Email',
 		'booking.phone': 'Điện thoại / Zalo', 'booking.yourName': 'Tên của bạn', 'booking.yourPhone': 'Số điện thoại của bạn', 'booking.preferred': 'Phương thức liên hệ ưu tiên',
+		'booking.otherDetails': 'Hãy mô tả lựa chọn “Khác” của bạn', 'booking.otherPlaceholder': 'Một mô tả ngắn sẽ giúp tôi hiểu đúng yêu cầu.',
+		'booking.uploadRealHint': 'Tệp được tải lên an toàn cùng yêu cầu · tối đa 10 MB mỗi tệp', 'booking.budgetRange': 'Ngân sách dự kiến', 'booking.budgetTimingTitle': 'Ngân sách và <em>thời gian</em> phù hợp với bạn?',
 		'booking.reviewKicker': 'Kiểm tra / Tóm tắt dự án', 'booking.reviewTitle': 'Mọi thông tin đã <em>chính xác?</em>', 'booking.service': 'Dịch vụ', 'booking.package': 'Gói',
 		'booking.estimate': 'Chi phí dự kiến', 'booking.projectType': 'Loại dự án', 'booking.goal': 'Mục tiêu', 'booking.style': 'Phong cách', 'booking.contact': 'Liên hệ', 'booking.notesShort': 'Ghi chú',
 		'booking.edit': 'Chỉnh sửa thông tin dự án', 'booking.ready': 'Yêu cầu dự án đã sẵn sàng', 'booking.successTitle': 'Tuyệt vời.<br><em>Hãy cùng tạo nên điều khác biệt.</em>',
@@ -193,6 +198,7 @@ const COPY = {
 		'booking.complete': 'Hoàn tất', 'booking.summary': 'Tóm tắt', 'booking.step': 'Bước', 'booking.submit': 'Gửi yêu cầu <span aria-hidden="true">↗</span>',
 		'error.choose': 'Vui lòng chọn một phương án để tiếp tục.', 'error.deadline': 'Vui lòng chọn deadline hoặc đánh dấu linh hoạt.', 'error.name': 'Vui lòng nhập tên của bạn.',
 		'error.contact': 'Vui lòng nhập ít nhất email hoặc số điện thoại / Zalo.', 'error.email': 'Vui lòng nhập đúng định dạng email.', 'error.method': 'Vui lòng chọn phương thức liên hệ.', 'error.save': 'Chưa thể gửi yêu cầu lúc này. Vui lòng thử lại.',
+		'error.chooseServicePackage': 'Vui lòng chọn dịch vụ và gói phù hợp.', 'error.otherDetails': 'Vui lòng mô tả ngắn lựa chọn “Khác”.', 'error.budget': 'Vui lòng chọn khoảng ngân sách dự kiến.', 'error.emailRequired': 'Vui lòng nhập email khi chọn liên hệ qua Email.', 'error.phoneRequired': 'Vui lòng nhập số điện thoại khi chọn Điện thoại hoặc Zalo.',
 		'error.file': 'Các tệp lớn hơn 10 MB không được thêm.', 'date.flexible': 'Linh hoạt', 'date.none': 'Chưa xác định',
 		'admin.workspace': 'Không gian làm việc', 'admin.all': 'Tất cả dự án', 'admin.new': 'Yêu cầu mới', 'admin.active': 'Đang thực hiện', 'admin.completed': 'Đã hoàn thành', 'admin.archived': 'Đã lưu trữ',
 		'admin.viewSite': 'Xem website <span aria-hidden="true">↗</span>', 'admin.local': 'Dữ liệu cục bộ', 'admin.localNote': 'Dữ liệu chỉ được lưu trên trình duyệt này.',
@@ -288,7 +294,8 @@ const VALUE_VI = {
 	'Custom art direction': 'Art direction riêng', 'Advanced layouts': 'Bố cục nâng cao', 'Visual storytelling': 'Kể chuyện bằng hình ảnh',
 	'Custom branded layout': 'Bố cục theo thương hiệu', 'Reusable templates': 'Template tái sử dụng', 'Organized editable file': 'File chỉnh sửa được tổ chức rõ ràng', 'Export-ready assets': 'Tài nguyên sẵn sàng xuất',
 	'One key visual direction': 'Một hướng key visual', 'Platform-ready sizes': 'Đúng kích thước nền tảng', 'High-resolution exports': 'File xuất độ phân giải cao', 'Source file': 'File nguồn',
-	'Scope defined together': 'Cùng xác định phạm vi', 'Tailored deliverables': 'Sản phẩm bàn giao theo yêu cầu', 'Custom timeline': 'Tiến độ tuỳ chỉnh'
+	'Scope defined together': 'Cùng xác định phạm vi', 'Tailored deliverables': 'Sản phẩm bàn giao theo yêu cầu', 'Custom timeline': 'Tiến độ tuỳ chỉnh',
+	'Under 1M VND': 'Dưới 1 triệu', '1–3M VND': '1–3 triệu', '3–5M VND': '3–5 triệu', '5–10M VND': '5–10 triệu', 'Over 10M VND': 'Trên 10 triệu', 'Need consultation': 'Cần tư vấn thêm'
 };
 
 let language = localStorage.getItem( LANGUAGE_KEY ) === 'vi' ? 'vi' : 'en';

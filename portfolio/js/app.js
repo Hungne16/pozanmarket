@@ -10,7 +10,7 @@ import {
 	getPackage,
 	getService
 } from './data.js';
-import { createRemoteOrder, isBackendConfigured } from './backend.js';
+import { createRemoteOrder, isBackendConfigured, uploadRemoteProjectFile } from './backend.js';
 import { renderProjects } from './projects.js';
 import { getLanguage, initializePreferences, localizeValue, t } from './preferences.js';
 import { gsap } from 'gsap';
@@ -18,7 +18,9 @@ import { ScrollTrigger } from 'gsap/ScrollTrigger';
 
 gsap.registerPlugin( ScrollTrigger );
 
-const BOOKING_STEPS = 10;
+const BOOKING_STEPS = 5;
+const BOOKING_DRAFT_KEY = 'pozan_booking_draft';
+const BUDGET_OPTIONS = [ 'Under 1M VND', '1–3M VND', '3–5M VND', '5–10M VND', 'Over 10M VND', 'Need consultation' ];
 const state = {
 	service: '',
 	package: '',
@@ -26,6 +28,8 @@ const state = {
 	goal: '',
 	style: '',
 	contentStatus: '',
+	otherDetails: '',
+	budgetRange: '',
 	files: [],
 	requirements: '',
 	deadline: '',
@@ -35,6 +39,25 @@ const state = {
 	phone: '',
 	contactMethod: ''
 };
+const EMPTY_BOOKING_STATE = { ...state, files: [] };
+
+try {
+
+	Object.assign( state, JSON.parse( localStorage.getItem( BOOKING_DRAFT_KEY ) || '{}' ), { files: [] } );
+
+} catch {
+
+	localStorage.removeItem( BOOKING_DRAFT_KEY );
+
+}
+
+function saveBookingDraft() {
+
+	const { files, ...draft } = state;
+	void files;
+	localStorage.setItem( BOOKING_DRAFT_KEY, JSON.stringify( draft ) );
+
+}
 
 const serviceIcons = [
 	'<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="1"/><path d="M3 9h18M7 6.5h.01M10 6.5h.01"/></svg>',
@@ -408,6 +431,59 @@ function renderContactStep() {
 
 }
 
+function groupedChoices( label, values, selected, field ) {
+
+	return `<section class="booking-question"><h3>${label}</h3><div class="choice-grid compact">${values.map( ( value ) => `<button class="choice-card ${value === selected ? 'is-selected' : ''}" type="button" data-choice="${escapeHtml( value )}" data-field="${field}"><b>${escapeHtml( localizeValue( value ) )}</b><small>${t( 'booking.select' )}</small></button>` ).join( '' )}</div></section>`;
+
+}
+
+function renderServicePackageCombined() {
+
+	const service = getService( state.service );
+	return `<div class="booking-step"><p class="booking-kicker">01 / ${t( 'booking.service' )}</p><h2 id="booking-title">${t( 'booking.serviceTitle' )}</h2>
+		<div class="choice-grid booking-service-grid">${SERVICES.map( ( item ) => `<button class="choice-card ${item.id === state.service ? 'is-selected' : ''}" type="button" data-choice="${item.id}" data-field="service"><small>${item.code}</small><b>${escapeHtml( localizeValue( item.name ) )}</b><span class="choice-price">${item.id === 'other' ? localizeValue( item.price ) : `${t( 'service.starting' )} ${item.price}`}</span></button>` ).join( '' )}</div>
+		${service ? `<section class="booking-question package-question"><h3>${t( 'booking.packageTitle' )}</h3><div class="choice-grid package-grid">${service.packages.map( ( item ) => `<button class="choice-card ${item.id === state.package ? 'is-selected' : ''}" type="button" data-choice="${item.id}" data-field="package"><b>${escapeHtml( localizeValue( item.name ) )}</b><span class="choice-price">${escapeHtml( item.price )}</span><ul>${item.features.map( ( feature ) => `<li>${escapeHtml( localizeValue( feature ) )}</li>` ).join( '' )}</ul></button>` ).join( '' )}</div></section>` : ''}</div>`;
+
+}
+
+function renderProjectDetailsCombined() {
+
+	const needsOther = [ state.projectType, state.goal ].includes( 'Other' );
+	return `<div class="booking-step"><p class="booking-kicker">02 / ${t( 'booking.projectType' )}</p><h2 id="booking-title">${t( 'booking.projectTitle' )}</h2>
+		${groupedChoices( t( 'booking.projectType' ), PROJECT_TYPES, state.projectType, 'projectType' )}
+		${groupedChoices( t( 'booking.goal' ), PROJECT_GOALS, state.goal, 'goal' )}
+		${groupedChoices( t( 'booking.contentTitle' ), CONTENT_OPTIONS, state.contentStatus, 'contentStatus' )}
+		${needsOther ? `<div class="field-group"><label for="other-details">${t( 'booking.otherDetails' )}</label><input id="other-details" data-state-input="otherDetails" value="${escapeHtml( state.otherDetails )}" placeholder="${t( 'booking.otherPlaceholder' )}"></div>` : ''}</div>`;
+
+}
+
+function renderCreativeBriefCombined() {
+
+	const files = state.files.map( ( file, index ) => `<div class="file-item"><span>${escapeHtml( file.name )} · ${formatFileSize( file.size )}</span><button type="button" data-remove-file="${index}" aria-label="${t( 'booking.remove' )} ${escapeHtml( file.name )}">×</button></div>` ).join( '' );
+	return `<div class="booking-step"><p class="booking-kicker">03 / ${t( 'booking.style' )}</p><h2 id="booking-title">${t( 'booking.styleTitle' )}</h2>
+		<div class="choice-grid styles">${STYLE_OPTIONS.map( ( option ) => `<button class="choice-card style-card ${option.name === state.style ? 'is-selected' : ''}" type="button" data-choice="${escapeHtml( option.name )}" data-field="style"><div class="card-inner"><div class="style-preview ${option.className}"></div><div class="style-bottom"><div class="style-content"><span class="name">${escapeHtml( localizeValue( option.name ) )}</span><span class="about-me">${escapeHtml( localizeValue( option.desc ) )}</span></div></div></div></button>` ).join( '' )}</div>
+		<div class="creative-brief-grid"><div class="field-group"><label for="requirements">${t( 'booking.notes' )}</label><textarea id="requirements" data-state-input="requirements" placeholder="${t( 'booking.notesPlaceholder' )}">${escapeHtml( state.requirements )}</textarea></div><div><label class="upload-zone compact-upload"><input type="file" multiple accept="image/*,.pdf,.doc,.docx,.ppt,.pptx"><span><i class="upload-icon"></i><b>${t( 'booking.drop' )}</b><p>${t( 'booking.uploadRealHint' )}</p></span></label><div class="file-list">${files}</div></div></div></div>`;
+
+}
+
+function renderBudgetTimingCombined() {
+
+	return `<div class="booking-step"><p class="booking-kicker">04 / ${getLanguage() === 'vi' ? 'Ngân sách & thời gian' : 'Budget & timing'}</p><h2 id="booking-title">${t( 'booking.budgetTimingTitle' )}</h2>
+		${groupedChoices( t( 'booking.budgetRange' ), BUDGET_OPTIONS, state.budgetRange, 'budgetRange' )}
+		<section class="booking-question"><h3>${t( 'booking.deadline' )}</h3><div class="date-row"><div class="field-group"><input id="deadline" type="date" min="${new Date().toISOString().split( 'T' )[ 0 ]}" value="${escapeHtml( state.deadline )}" ${state.flexibleDeadline ? 'disabled' : ''}></div><label class="check-option"><input id="flexible-deadline" type="checkbox" ${state.flexibleDeadline ? 'checked' : ''}> ${t( 'booking.flexible' )}</label></div></section></div>`;
+
+}
+
+function renderContactReviewCombined() {
+
+	const service = getService( state.service );
+	const packageItem = getPackage( state.service, state.package );
+	return `<div class="booking-step"><p class="booking-kicker">05 / ${t( 'booking.contact' )}</p><h2 id="booking-title">${t( 'booking.contactTitle' )}</h2>
+		<div class="contact-review-grid"><div><div class="field-row"><div class="field-group"><label for="client-name">${t( 'booking.name' )}</label><input id="client-name" data-state-input="name" autocomplete="name" value="${escapeHtml( state.name )}" placeholder="${t( 'booking.yourName' )}"></div><div class="field-group"><label for="client-email">${t( 'booking.email' )}</label><input id="client-email" data-state-input="email" type="email" autocomplete="email" value="${escapeHtml( state.email )}" placeholder="you@example.com"></div></div><div class="field-group"><label for="client-phone">${t( 'booking.phone' )}</label><input id="client-phone" data-state-input="phone" type="tel" autocomplete="tel" value="${escapeHtml( state.phone )}" placeholder="${t( 'booking.yourPhone' )}"></div><fieldset class="contact-method"><legend>${t( 'booking.preferred' )}</legend><div class="contact-options">${[ 'Email', 'Phone', 'Zalo' ].map( ( method ) => `<label><input type="radio" name="contact-method" value="${method}" ${state.contactMethod === method ? 'checked' : ''}><span>${localizeValue( method )}</span></label>` ).join( '' )}</div></fieldset></div>
+		<div class="summary-grid compact-summary"><div class="summary-item"><small>${t( 'booking.service' )}</small><strong>${escapeHtml( localizeValue( service?.name ) )}</strong></div><div class="summary-item"><small>${t( 'booking.package' )}</small><strong>${escapeHtml( localizeValue( packageItem?.name ) )}</strong></div><div class="summary-item price"><small>${t( 'booking.estimate' )}</small><strong>${escapeHtml( packageItem?.estimate || '' )}</strong></div><div class="summary-item"><small>${t( 'booking.budgetRange' )}</small><strong>${escapeHtml( localizeValue( state.budgetRange ) )}</strong></div><div class="summary-item"><small>${t( 'booking.goal' )}</small><strong>${escapeHtml( localizeValue( state.goal ) )}</strong></div><div class="summary-item"><small>${t( 'booking.deadline' )}</small><strong>${formatDeadline()}</strong></div></div></div></div>`;
+
+}
+
 function formatDeadline() {
 
 	if ( state.flexibleDeadline ) return t( 'date.flexible' );
@@ -436,16 +512,20 @@ async function persistInquiry() {
 
 	const timestamp = new Date().toISOString();
 	savedTrackingToken = crypto.randomUUID().replaceAll( '-', '' );
+	const files = isBackendConfigured()
+		? await Promise.all( state.files.map( uploadRemoteProjectFile ) )
+		: state.files.map( ( file ) => ( { name: file.name, size: file.size, type: file.type } ) );
 	const order = {
 		...state,
 		trackingToken: savedTrackingToken,
-		files: state.files.map( ( file ) => ( { name: file.name, size: file.size, type: file.type } ) ),
+		files,
 		status: 'new',
 		timestamp
 	};
 	if ( isBackendConfigured() ) {
 
 		savedInquiryId = await createRemoteOrder( order );
+		localStorage.removeItem( BOOKING_DRAFT_KEY );
 		return;
 
 	}
@@ -454,23 +534,18 @@ async function persistInquiry() {
 	existing.push( order );
 	localStorage.setItem( 'portfolio_orders', JSON.stringify( existing ) );
 	savedInquiryId = order.id;
+	localStorage.removeItem( BOOKING_DRAFT_KEY );
 
 }
 
 function renderBookingStep() {
 
 	const renderers = [
-		renderServiceStep,
-		renderPackageStep,
-		() => renderSimpleChoiceStep( t( 'booking.projectKicker' ), t( 'booking.projectTitle' ), PROJECT_TYPES, state.projectType ),
-		() => renderSimpleChoiceStep( t( 'booking.goalKicker' ), t( 'booking.goalTitle' ), PROJECT_GOALS, state.goal ),
-		renderStyleStep,
-		() => renderSimpleChoiceStep( t( 'booking.contentKicker' ), t( 'booking.contentTitle' ), CONTENT_OPTIONS, state.contentStatus, false ),
-		renderUploadStep,
-		renderRequirementsStep,
-		renderDeadlineStep,
-		renderContactStep,
-		renderSummary,
+		renderServicePackageCombined,
+		renderProjectDetailsCombined,
+		renderCreativeBriefCombined,
+		renderBudgetTimingCombined,
+		renderContactReviewCombined,
 		renderSuccess
 	];
 	elements.bookingContent.innerHTML = renderers[ currentStep ]();
@@ -483,13 +558,13 @@ function renderBookingStep() {
 
 function updateBookingHeader() {
 
-	const isSummary = currentStep === BOOKING_STEPS;
-	const isSuccess = currentStep > BOOKING_STEPS;
-	elements.stepLabel.textContent = isSuccess ? t( 'booking.complete' ) : isSummary ? t( 'booking.summary' ) : `${t( 'booking.step' )} ${currentStep + 1} / ${BOOKING_STEPS}`;
+	const isFinal = currentStep === BOOKING_STEPS - 1;
+	const isSuccess = currentStep >= BOOKING_STEPS;
+	elements.stepLabel.textContent = isSuccess ? t( 'booking.complete' ) : `${t( 'booking.step' )} ${currentStep + 1} / ${BOOKING_STEPS}`;
 	elements.progress.style.width = `${isSuccess ? 100 : Math.min( ( ( currentStep + 1 ) / BOOKING_STEPS ) * 100, 100 )}%`;
 	elements.backButton.hidden = currentStep === 0 || isSuccess;
 	elements.nextButton.hidden = isSuccess;
-	elements.nextButton.innerHTML = isSummary ? t( 'booking.submit' ) : t( 'booking.continue' );
+	elements.nextButton.innerHTML = isFinal ? t( 'booking.submit' ) : t( 'booking.continue' );
 
 }
 
@@ -545,44 +620,58 @@ function bindUploadEvents() {
 		renderBookingStep();
 
 	} ) );
-	elements.bookingContent.querySelector( '[data-skip-upload]' ).addEventListener( 'click', goToNextStep );
+	elements.bookingContent.querySelector( '[data-skip-upload]' )?.addEventListener( 'click', goToNextStep );
 
 }
 
 function bindStepEvents() {
 
-	elements.bookingContent.querySelectorAll( '[data-choice]' ).forEach( ( button ) => button.addEventListener( 'click', () => selectChoice( button.dataset.choice ) ) );
-	if ( currentStep === 6 ) bindUploadEvents();
-	if ( currentStep === 7 ) elements.bookingContent.querySelector( '#requirements' ).addEventListener( 'input', ( event ) => {
+	elements.bookingContent.querySelectorAll( '[data-choice][data-field]' ).forEach( ( button ) => button.addEventListener( 'click', () => {
 
-		state.requirements = event.target.value;
+		const field = button.dataset.field;
+		const value = button.dataset.choice;
+		if ( field === 'service' && state.service !== value ) state.package = '';
+		state[ field ] = value;
+		saveBookingDraft();
+		if ( field === 'service' || value === 'Other' ) renderBookingStep();
+		else elements.bookingContent.querySelectorAll( `[data-field="${field}"]` ).forEach( ( item ) => item.classList.toggle( 'is-selected', item === button ) );
+		elements.formError.textContent = '';
 
-	} );
-	if ( currentStep === 8 ) {
+	} ) );
+	elements.bookingContent.querySelectorAll( '[data-state-input]' ).forEach( ( input ) => input.addEventListener( 'input', ( event ) => {
+
+		state[ event.target.dataset.stateInput ] = event.target.value;
+		saveBookingDraft();
+
+	} ) );
+	if ( currentStep === 2 ) bindUploadEvents();
+	if ( currentStep === 3 ) {
 
 		const dateInput = elements.bookingContent.querySelector( '#deadline' );
 		const flexibleInput = elements.bookingContent.querySelector( '#flexible-deadline' );
 		dateInput.addEventListener( 'input', ( event ) => {
 
 			state.deadline = event.target.value;
+			saveBookingDraft();
 
 		} );
 		flexibleInput.addEventListener( 'change', ( event ) => {
 
 			state.flexibleDeadline = event.target.checked;
 			dateInput.disabled = event.target.checked;
+			saveBookingDraft();
 
 		} );
 
 	}
 
-	if ( currentStep === 9 ) bindContactEvents();
-	if ( currentStep === 10 ) elements.bookingContent.querySelector( '[data-summary-edit]' ).addEventListener( 'click', () => {
+	if ( currentStep === 4 ) elements.bookingContent.querySelectorAll( '[name="contact-method"]' ).forEach( ( input ) => input.addEventListener( 'change', ( event ) => {
 
-		currentStep = 0; renderBookingStep();
+		state.contactMethod = event.target.value;
+		saveBookingDraft();
 
-	} );
-	if ( currentStep === 11 ) elements.bookingContent.querySelector( '[data-back-home]' ).addEventListener( 'click', closeBooking );
+	} ) );
+	if ( currentStep === 5 ) elements.bookingContent.querySelector( '[data-back-home]' ).addEventListener( 'click', closeBooking );
 
 }
 
@@ -604,15 +693,21 @@ function bindContactEvents() {
 
 function validateCurrentStep() {
 
-	const requiredKeys = [ 'service', 'package', 'projectType', 'goal', 'style', 'contentStatus' ];
-	if ( currentStep < requiredKeys.length && ! state[ requiredKeys[ currentStep ] ] ) return t( 'error.choose' );
-	if ( currentStep === 8 && ! state.flexibleDeadline && ! state.deadline ) return t( 'error.deadline' );
-	if ( currentStep === 9 ) {
+	if ( currentStep === 0 && ( ! getService( state.service ) || ! getPackage( state.service, state.package ) ) ) return t( 'error.chooseServicePackage' );
+	if ( currentStep === 1 && ( ! state.projectType || ! state.goal || ! state.contentStatus ) ) return t( 'error.choose' );
+	if ( currentStep === 1 && [ state.projectType, state.goal ].includes( 'Other' ) && ! state.otherDetails.trim() ) return t( 'error.otherDetails' );
+	if ( currentStep === 2 && ! state.style ) return t( 'error.choose' );
+	if ( currentStep === 2 && state.style === 'Other' && ! state.requirements.trim() ) return t( 'error.otherDetails' );
+	if ( currentStep === 3 && ! state.budgetRange ) return t( 'error.budget' );
+	if ( currentStep === 3 && ! state.flexibleDeadline && ! state.deadline ) return t( 'error.deadline' );
+	if ( currentStep === 4 ) {
 
 		if ( ! state.name.trim() ) return t( 'error.name' );
 		if ( ! state.email.trim() && ! state.phone.trim() ) return t( 'error.contact' );
 		if ( state.email && ! /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test( state.email ) ) return t( 'error.email' );
 		if ( ! state.contactMethod ) return t( 'error.method' );
+		if ( state.contactMethod === 'Email' && ! state.email.trim() ) return t( 'error.emailRequired' );
+		if ( [ 'Phone', 'Zalo' ].includes( state.contactMethod ) && ! state.phone.trim() ) return t( 'error.phoneRequired' );
 
 	}
 
@@ -630,7 +725,7 @@ async function goToNextStep() {
 
 	}
 
-	if ( currentStep === BOOKING_STEPS && ! savedInquiryId ) {
+	if ( currentStep === BOOKING_STEPS - 1 && ! savedInquiryId ) {
 
 		elements.nextButton.disabled = true;
 		try {
@@ -647,20 +742,21 @@ async function goToNextStep() {
 		}
 
 	}
-	currentStep = Math.min( currentStep + 1, BOOKING_STEPS + 1 );
+	currentStep = Math.min( currentStep + 1, BOOKING_STEPS );
 	renderBookingStep();
 
 }
 
 function openBooking( serviceId = '', packageId = '' ) {
 
+	if ( currentStep >= BOOKING_STEPS ) Object.assign( state, EMPTY_BOOKING_STATE, { files: [] } );
 	savedInquiryId = '';
 	savedTrackingToken = '';
 	if ( serviceId && getService( serviceId ) ) {
 
 		state.service = serviceId;
 		state.package = packageId || '';
-		currentStep = packageId ? 2 : 1;
+		currentStep = packageId ? 1 : 0;
 
 	} else {
 

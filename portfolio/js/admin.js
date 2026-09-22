@@ -419,6 +419,15 @@ function detailItem( label, value, wide = false ) {
 
 }
 
+function fileDetail( files = [] ) {
+
+	if ( ! files.length ) return detailItem( t( 'admin.files' ), t( 'admin.noFiles' ), true );
+	return `<div class="detail-item wide"><small>${escapeHtml( t( 'admin.files' ) )}</small><div class="admin-file-list">${files.map( ( file ) => file.url
+		? `<a href="${escapeHtml( file.url )}" target="_blank" rel="noopener">${escapeHtml( file.name )} <span>↗</span></a>`
+		: `<span>${escapeHtml( file.name )}</span>` ).join( '' )}</div></div>`;
+
+}
+
 function taskRow( task = { label: '', done: false } ) {
 
 	return `<div class="task-row"><input type="checkbox" ${task.done ? 'checked' : ''} aria-label="${t( 'admin.taskDone' )}"><input type="text" value="${escapeHtml( task.label )}" aria-label="${t( 'admin.taskName' )}"><button class="icon-button" type="button" data-remove-task aria-label="${t( 'admin.removeTask' )}">×</button></div>`;
@@ -502,9 +511,11 @@ function openDetail( orderId ) {
 			${detailItem( t( 'admin.preferred' ), order.contactMethod )}
 			${detailItem( t( 'admin.visual' ), order.style )}
 			${detailItem( t( 'admin.contentStatus' ), order.contentStatus )}
+			${detailItem( t( 'booking.budgetRange' ), order.budgetRange )}
+			${order.otherDetails ? detailItem( t( 'booking.otherDetails' ), order.otherDetails, true ) : ''}
 			${detailItem( t( 'admin.fullNotes' ), order.requirements, true )}
 			${detailItem( t( 'admin.submitted' ), formatDate( order.timestamp, true ) )}
-			${detailItem( t( 'admin.files' ), order.files?.length ? `${order.files.length} ${t( 'admin.fileRefs' )}` : t( 'admin.noFiles' ) )}
+			${fileDetail( order.files )}
 		</div>
 		${order.clientFeedbackAt ? `<section class="client-feedback-card"><span>${t( 'admin.clientResponseTitle' )}</span><strong>${t( `admin.approval.${order.approval || 'changes'}` )}</strong><p>${escapeHtml( order.clientFeedback || t( 'admin.noClientComment' ) )}</p><small>${t( 'admin.clientResponseAt' )} ${escapeHtml( formatDate( order.clientFeedbackAt, true ) )}</small></section>` : ''}
 		${order.status !== 'archived' ? progressEditor( order ) : ''}
@@ -680,8 +691,8 @@ function exportCsv() {
 
 	}
 
-	const headers = [ 'Submitted', 'Status', 'Completed', 'Priority', 'Phase', 'Progress', 'Target date', 'Next action', 'Follow-up date', 'Approval', 'Budget', 'Paid', 'Name', 'Email', 'Phone', 'Contact method', 'Service', 'Package', 'Project type', 'Goal', 'Style', 'Content', 'Deadline', 'Requirements', 'Internal notes', 'Tasks', 'Milestones', 'Resource links' ];
-	const rows = orders.map( ( order ) => [ order.timestamp, order.status, order.completedAt, order.priority, order.phase, `${clampProgress( order.progress )}%`, order.targetDate, order.nextAction, order.nextActionDate, order.approval, order.budget, order.paid, order.name, order.email, order.phone, order.contactMethod, serviceName( order.service ), packageName( order.service, order.package ), order.projectType, order.goal, order.style, order.contentStatus, order.flexibleDeadline ? 'Flexible' : order.deadline, order.requirements, order.internalNotes, ( order.tasks || [] ).map( ( task ) => `${task.done ? '[x]' : '[ ]'} ${task.label}` ).join( ' | ' ), ( order.milestones || [] ).map( ( milestone ) => `${milestone.title} (${milestone.status}${milestone.dueDate ? `, ${milestone.dueDate}` : ''})` ).join( ' | ' ), ( order.resourceLinks || [] ).join( ' | ' ) ] );
+	const headers = [ 'Submitted', 'Status', 'Completed', 'Priority', 'Phase', 'Progress', 'Target date', 'Next action', 'Follow-up date', 'Approval', 'Budget', 'Paid', 'Client budget range', 'Name', 'Email', 'Phone', 'Contact method', 'Service', 'Package', 'Project type', 'Goal', 'Other details', 'Style', 'Content', 'Deadline', 'Requirements', 'Uploaded files', 'Internal notes', 'Tasks', 'Milestones', 'Resource links' ];
+	const rows = orders.map( ( order ) => [ order.timestamp, order.status, order.completedAt, order.priority, order.phase, `${clampProgress( order.progress )}%`, order.targetDate, order.nextAction, order.nextActionDate, order.approval, order.budget, order.paid, order.budgetRange, order.name, order.email, order.phone, order.contactMethod, serviceName( order.service ), packageName( order.service, order.package ), order.projectType, order.goal, order.otherDetails, order.style, order.contentStatus, order.flexibleDeadline ? 'Flexible' : order.deadline, order.requirements, ( order.files || [] ).map( ( file ) => file.url || file.name ).join( ' | ' ), order.internalNotes, ( order.tasks || [] ).map( ( task ) => `${task.done ? '[x]' : '[ ]'} ${task.label}` ).join( ' | ' ), ( order.milestones || [] ).map( ( milestone ) => `${milestone.title} (${milestone.status}${milestone.dueDate ? `, ${milestone.dueDate}` : ''})` ).join( ' | ' ), ( order.resourceLinks || [] ).join( ' | ' ) ] );
 	const blob = new Blob( [ `\uFEFF${[ headers, ...rows ].map( ( row ) => row.map( csvCell ).join( ',' ) ).join( '\n' )}` ], { type: 'text/csv;charset=utf-8' } );
 	const url = URL.createObjectURL( blob );
 	const link = Object.assign( document.createElement( 'a' ), { href: url, download: `pozan-market-projects-${new Date().toISOString().slice( 0, 10 )}.csv` } );
