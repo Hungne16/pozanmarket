@@ -980,9 +980,10 @@ async function initializeData() {
 		return;
 
 	}
-	adminKey = sessionStorage.getItem( ADMIN_KEY_STORAGE ) || window.prompt( getLanguage() === 'vi' ? 'Nhập mã quản trị Pozan Market' : 'Enter the Pozan Market admin key' ) || '';
+	adminKey = localStorage.getItem( ADMIN_KEY_STORAGE ) || sessionStorage.getItem( ADMIN_KEY_STORAGE ) || window.prompt( getLanguage() === 'vi' ? 'Nhập mã quản trị Pozan Market' : 'Enter the Pozan Market admin key' ) || '';
 	if ( ! adminKey ) throw new Error( 'Admin key is required.' );
-	sessionStorage.setItem( ADMIN_KEY_STORAGE, adminKey );
+	localStorage.setItem( ADMIN_KEY_STORAGE, adminKey );
+	sessionStorage.removeItem( ADMIN_KEY_STORAGE );
 	orders = await loadRemoteOrders( adminKey );
 	const localOrders = loadLocalOrders();
 	if ( ! orders.length && localOrders.length ) {
@@ -1232,7 +1233,7 @@ async function initialize() {
 initialize().catch( ( error ) => {
 
 	console.error( 'Unable to initialize admin workspace', error );
-	sessionStorage.removeItem( ADMIN_KEY_STORAGE );
+	if ( /invalid admin key/i.test( error.message ) ) localStorage.removeItem( ADMIN_KEY_STORAGE );
 	elements.list.innerHTML = `<div class="admin-empty"><h3>${getLanguage() === 'vi' ? 'Không thể mở dữ liệu quản trị' : 'Unable to open admin data'}</h3><p>${escapeHtml( error.message )}</p></div>`;
 
 } );
