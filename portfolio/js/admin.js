@@ -895,7 +895,7 @@ async function copyClientPortal() {
 		else saveLocalOrders();
 
 	}
-	const url = new URL( './client.html', window.location.href );
+	const url = new URL( './client', window.location.href );
 	url.searchParams.set( 'project', order.id );
 	url.searchParams.set( 'token', order.trackingToken );
 	try {

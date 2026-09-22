@@ -2,8 +2,9 @@
   "buildCommand": "npm run build",
   "outputDirectory": "dist",
   "cleanUrls": true,
-  "rewrites": [
-    { "source": "/", "destination": "/portfolio/" },
-    { "source": "/admin", "destination": "/portfolio/admin" }
-  ]
+	"rewrites": [
+		{ "source": "/", "destination": "/portfolio/" },
+		{ "source": "/admin", "destination": "/portfolio/admin" },
+		{ "source": "/portal", "destination": "/portfolio/client" }
+	]
 }
