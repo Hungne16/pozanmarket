@@ -110,6 +110,16 @@ function renderPayment() {
 
 }
 
+function renderUpdates() {
+
+	const updates = Array.isArray( project.clientUpdates ) ? [ ...project.clientUpdates ] : [];
+	if ( ! updates.length && project.clientMessage ) updates.push( { message: project.clientMessage, at: project.timestamp, progress: project.progress, phase: project.phase } );
+	if ( ! updates.length ) return `<section class="project-report is-empty"><div><span>${t( 'client.latestReport' )}</span><h2>${t( 'client.noReportsTitle' )}</h2><p>${t( 'client.noReportsText' )}</p></div></section>`;
+	const [ latest, ...history ] = updates;
+	return `<section class="project-report"><div class="report-heading"><span>${t( 'client.latestReport' )}</span><time>${formatDate( latest.at, true )}</time></div><div class="report-content"><div><small>${phaseLabel( latest.phase )} · ${Number( latest.progress ) || 0}%</small><h2>${t( 'client.reportTitle' )}</h2><p>${escapeHtml( latest.message )}</p></div>${history.length ? `<details><summary>${t( 'client.olderReports' )} (${history.length})</summary><div class="report-history">${history.slice( 0, 8 ).map( ( item ) => `<article><time>${formatDate( item.at, true )}</time><strong>${phaseLabel( item.phase )} · ${Number( item.progress ) || 0}%</strong><p>${escapeHtml( item.message )}</p></article>` ).join( '' )}</div></details>` : ''}</div></section>`;
+
+}
+
 function renderProject() {
 
 	if ( ! project ) return renderInvalid();
@@ -121,19 +131,17 @@ function renderProject() {
 			<div class="portal-hero-grid"><div><small>${escapeHtml( serviceName() )} · ${escapeHtml( packageName() )}</small><h1>${escapeHtml( localizeValue( project.goal ) || serviceName() )}</h1><p>${t( 'client.hello' )} ${escapeHtml( project.name )}. ${t( 'client.heroText' )}</p></div><div class="progress-orbit" style="--progress:${progress * 3.6}deg"><div><strong>${progress}%</strong><span>${t( 'client.complete' )}</span></div></div></div>
 			<div class="hero-progress"><i style="width:${progress}%"></i></div>
 		</section>
-		<section class="portal-overview">
-			<article><small>${t( 'client.phase' )}</small><strong>${escapeHtml( phaseLabel( project.phase ) )}</strong><span>${t( 'client.phaseHint' )}</span></article>
-			<article><small>${t( 'client.delivery' )}</small><strong>${escapeHtml( formatDate( project.targetDate ) )}</strong><span>${t( 'client.deliveryHint' )}</span></article>
-			<article><small>${t( 'client.nextAction' )}</small><strong>${escapeHtml( project.nextAction || t( 'client.waitingUpdate' ) )}</strong><span>${project.nextActionDate ? formatDate( project.nextActionDate ) : t( 'client.noDate' )}</span></article>
-			<article><small>${t( 'client.approval' )}</small><strong>${escapeHtml( t( `client.approval.${approval}` ) )}</strong><span>${project.clientFeedbackAt ? `${t( 'client.updated')} ${formatDate( project.clientFeedbackAt, true )}` : t( 'client.approvalHint' )}</span></article>
+		<section class="project-summary-strip">
+			<div><small>${t( 'client.phase' )}</small><strong>${escapeHtml( phaseLabel( project.phase ) )}</strong></div>
+			<div><small>${t( 'client.delivery' )}</small><strong>${escapeHtml( formatDate( project.targetDate ) )}</strong></div>
+			<div><small>${t( 'client.nextAction' )}</small><strong>${escapeHtml( project.nextAction || t( 'client.waitingUpdate' ) )}</strong>${project.nextActionDate ? `<span>${formatDate( project.nextActionDate )}</span>` : ''}</div>
 		</section>
-		${project.clientMessage ? `<section class="client-message-card"><span>${t( 'client.updateFromStudio' )}</span><p>${escapeHtml( project.clientMessage )}</p></section>` : ''}
-		<div class="portal-grid">
-			<section class="portal-card milestones-card"><header><div><span>01</span><h2>${t( 'client.milestones' )}</h2></div><p>${t( 'client.milestonesText' )}</p></header>${renderMilestones()}</section>
-			<section class="portal-card payment-card"><header><div><span>02</span><h2>${t( 'client.payment' )}</h2></div></header>${renderPayment()}</section>
-			<section class="portal-card files-card"><header><div><span>03</span><h2>${t( 'client.files' )}</h2></div><p>${t( 'client.filesText' )}</p></header>${renderLinks()}</section>
-			<section class="portal-card approval-card"><header><div><span>04</span><h2>${t( 'client.review' )}</h2></div><p>${t( 'client.reviewText' )}</p></header><label><span>${t( 'client.feedback' )}</span><textarea rows="4" data-client-feedback placeholder="${t( 'client.feedbackPlaceholder' )}">${escapeHtml( project.clientFeedback || '' )}</textarea></label><div class="approval-actions"><button class="client-button secondary" type="button" data-client-response="changes">${t( 'client.requestChanges' )}</button><button class="client-button primary" type="button" data-client-response="approved">${t( 'client.approve' )} ✓</button></div></section>
-		</div>`;
+		${renderUpdates()}
+		<section class="project-tracker">
+			<header><div><span>${t( 'client.tracking' )}</span><h2>${t( 'client.milestones' )}</h2></div><p>${t( 'client.milestonesText' )}</p></header>
+			<div class="tracker-layout"><div>${renderMilestones()}</div><aside><section><small>${t( 'client.approval' )}</small><strong>${escapeHtml( t( `client.approval.${approval}` ) )}</strong>${project.clientFeedbackAt ? `<span>${t( 'client.updated')} ${formatDate( project.clientFeedbackAt, true )}</span>` : ''}</section><details><summary>${t( 'client.payment' )}</summary>${renderPayment()}</details><details><summary>${t( 'client.files' )}</summary>${renderLinks()}</details></aside></div>
+		</section>
+		<section class="portal-feedback"><div><span>${t( 'client.review' )}</span><h2>${t( 'client.simpleFeedbackTitle' )}</h2><p>${t( 'client.reviewText' )}</p></div><div class="feedback-form"><textarea rows="3" data-client-feedback placeholder="${t( 'client.feedbackPlaceholder' )}">${escapeHtml( project.clientFeedback || '' )}</textarea><div><button class="client-button secondary" type="button" data-client-response="changes">${t( 'client.requestChanges' )}</button><button class="client-button primary" type="button" data-client-response="approved">${t( 'client.approve' )} ✓</button></div></div></section>`;
 
 }
 

@@ -426,7 +426,7 @@ function progressEditor( order ) {
 				<label class="config-field"><span>${t( 'admin.targetDate' )}</span><input type="date" value="${escapeHtml( order.targetDate || order.deadline || '' )}" data-project-target></label>
 				<label class="config-field progress-range"><span>${t( 'admin.progress' )}</span><input type="range" min="0" max="100" step="5" value="${progress}" data-project-progress></label>
 				<label class="config-field progress-notes"><span>${t( 'admin.internalNotes' )}</span><textarea rows="4" data-project-notes placeholder="${t( 'admin.internalNotesPlaceholder' )}">${escapeHtml( order.internalNotes || '' )}</textarea></label>
-				<label class="config-field client-message"><span>${t( 'admin.clientUpdate' )}</span><textarea rows="3" data-client-message placeholder="${t( 'admin.clientUpdatePlaceholder' )}">${escapeHtml( order.clientMessage || '' )}</textarea><small>${t( 'admin.clientUpdateHint' )}</small></label>
+				<label class="config-field client-message"><span>${t( 'admin.clientUpdate' )}</span><textarea rows="3" data-client-message placeholder="${t( 'admin.clientUpdatePlaceholder' )}"></textarea><small>${t( 'admin.clientUpdateHint' )}</small></label>
 				<div class="task-editor"><span class="package-editor-label">${t( 'admin.checklist' )}</span><div class="task-list" data-task-list>${tasks.map( taskRow ).join( '' )}</div><div class="task-add"><input type="text" data-new-task placeholder="${t( 'admin.newTaskPlaceholder' )}"><button type="button" data-add-task>+ ${t( 'admin.addTask' )}</button></div></div>
 				<div class="milestone-editor"><div class="editor-title"><span class="package-editor-label">${t( 'admin.milestones' )}</span><button class="text-action" type="button" data-add-milestone>+ ${t( 'admin.addMilestone' )}</button></div><div class="milestone-list" data-milestone-list>${milestones.map( milestoneRow ).join( '' )}</div></div>
 				<label class="config-field resource-links"><span>${t( 'admin.resourceLinks' )}</span><textarea rows="3" data-project-links placeholder="${t( 'admin.resourceLinksPlaceholder' )}">${escapeHtml( ( order.resourceLinks || [] ).join( '\n' ) )}</textarea></label>
@@ -542,7 +542,14 @@ async function saveProjectProgress() {
 	order.targetDate = elements.detailBody.querySelector( '[data-project-target]' ).value;
 	order.progress = clampProgress( elements.detailBody.querySelector( '[data-project-progress]' ).value );
 	order.internalNotes = elements.detailBody.querySelector( '[data-project-notes]' ).value.trim();
-	order.clientMessage = elements.detailBody.querySelector( '[data-client-message]' ).value.trim();
+	const clientMessage = elements.detailBody.querySelector( '[data-client-message]' ).value.trim();
+	order.clientUpdates = Array.isArray( order.clientUpdates ) ? order.clientUpdates : [];
+	if ( clientMessage ) {
+
+		order.clientMessage = clientMessage;
+		order.clientUpdates.unshift( { message: clientMessage, at: new Date().toISOString(), progress: order.progress, phase: order.phase } );
+
+	}
 	order.priority = elements.detailBody.querySelector( '[data-project-priority]' ).value;
 	order.approval = elements.detailBody.querySelector( '[data-project-approval]' ).value;
 	order.budget = Number( elements.detailBody.querySelector( '[data-project-budget]' ).value ) || 0;
@@ -569,6 +576,7 @@ async function saveProjectProgress() {
 		progress: order.progress,
 		internalNotes: order.internalNotes,
 		clientMessage: order.clientMessage,
+		clientUpdates: order.clientUpdates,
 		tasks: order.tasks,
 		milestones: order.milestones,
 		priority: order.priority,

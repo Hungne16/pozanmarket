@@ -42,6 +42,7 @@ function presentClientOrder( document ) {
 		paid: Number( order.paid ) || 0,
 		resourceLinks: Array.isArray( order.resourceLinks ) ? order.resourceLinks : [],
 		clientMessage: order.clientMessage || '',
+		clientUpdates: Array.isArray( order.clientUpdates ) ? order.clientUpdates : [],
 		clientFeedback: order.clientFeedback || '',
 		clientFeedbackAt: order.clientFeedbackAt || ''
 	};
